@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfiguration {
+	
     /**
      * Creating an OpenAPI to aid in authentication.
      */
@@ -28,4 +29,5 @@ public class SwaggerConfiguration {
                         .license(new License().name("Draka"))
                         .version("2.0"));
     }
+   
 }

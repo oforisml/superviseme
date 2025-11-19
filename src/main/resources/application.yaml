@@ -39,5 +39,11 @@ spring:
       env:
         show-values: always
 
+
+
 file:
   upload-dir: ./documents
+
+      
+
+
