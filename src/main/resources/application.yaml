@@ -39,3 +39,8 @@ spring:
       env:
         show-values: always
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      
+
