@@ -3,6 +3,7 @@ package com.example.superviseme.service;
 
 import com.example.superviseme.entities.StudentProfile;
 import com.example.superviseme.entities.User;
+import com.example.superviseme.enums.Role;
 import com.example.superviseme.record.StudentRegistrationDto;
 import com.example.superviseme.record.StudentProfileRecord;
 import com.example.superviseme.repository.StudentProfileRepository;
@@ -62,7 +63,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public List<User> findByRole(User.Role role) {
+    public List<User> findByRole(Role role) {
         return userRepository.findByRoleIs(role);
     }
 
@@ -70,7 +71,7 @@ public class UserService {
     public StudentProfile createStudentProfile(UUID userId, StudentProfile studentProfile) {
         User user = findById(userId);
 
-        if (user.getRole() != User.Role.STUDENT) {
+        if (user.getRole() != Role.STUDENT) {
             throw new RuntimeException("User is not a student");
         }
 
@@ -114,12 +115,15 @@ public class UserService {
             user.setActive(record.isActive());
         }
 
+        if (record.role() != null) {
+            user.setRole(record.role());
+        }
 
 
 
 
         StudentProfile studentProfile = user.getStudentProfile();
-        if(studentProfile.getId() == null )
+        if(studentProfile == null || studentProfile.getId() == null )
             studentProfile = new StudentProfile();
         // Update allowed fields
         if (record.fullName() != null) {
@@ -139,6 +143,10 @@ public class UserService {
             studentProfile.setResearchTopic(record.thesisTitle());
         }
 
+        studentProfile.setStudentId(user.getStudentId());
+
+
+
         if (record.abstractText() != null) {
             studentProfile.setAbstractText(record.abstractText());
         }
@@ -146,11 +154,12 @@ public class UserService {
             studentProfile.setResearchObjectives(record.researchObjective());
         }
 
+
+        user = userRepository.save(user);
+
+        studentProfile.setUser(user);
         studentProfileRepository.save(studentProfile);
-
-        user = findById(record.id());
-
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(findById(user.getId()));
     }
 
     public StudentProfile getStudentProfile(UUID userId) {
@@ -200,6 +209,7 @@ public class UserService {
         user.setPin(request.pin());
         user.setStudentId(request.studentId());
         user = createUser(user);
+        user.setRole(Role.STUDENT);
         return ResponseEntity.ok(user);
     }
 }

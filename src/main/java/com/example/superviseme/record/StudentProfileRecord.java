@@ -1,6 +1,7 @@
 package com.example.superviseme.record;
 
-import org.springframework.objenesis.SpringObjenesis;
+import com.example.superviseme.entities.User;
+import com.example.superviseme.enums.Role;
 
 import java.util.UUID;
 public record StudentProfileRecord(
@@ -16,6 +17,7 @@ public record StudentProfileRecord(
      String programType,
      String researchArea,
      String researchObjective,
-     String lectureAlignment
+     String lectureAlignment,
+     Role role
 
      ){}

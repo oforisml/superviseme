@@ -1,5 +1,7 @@
 package com.example.superviseme.entities;
 
+import com.example.superviseme.enums.Role;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.hypersistence.utils.hibernate.type.basic.PostgreSQLEnumType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -58,6 +60,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
     private StudentProfile studentProfile;
 
     public UUID getId() {
@@ -144,9 +147,5 @@ public class User {
 //    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    private AdminProfile adminProfile;
 
-    public enum Role {
-        STUDENT,
-//        SUPERVISOR,
-//        ADMIN
-    }
+
 }
