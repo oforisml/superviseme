@@ -11,15 +11,18 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    @Query("select u from User u where u.pin = ?1 and u.studentId = ?2")
+    @Query("select u from tbl_user u where u.pin = ?1 and u.studentId = ?2")
+    Optional<User> findByPinEqualsAndStudentIdEquals(String pin, String studentId);
+    @Query("select u from tbl_user u where u.pin = ?1 and u.studentId = ?2")
     Optional<User> findByPinIsAndStudentIdIs(String pin, String studentId);
-    @Query("select u from User u where u.role = ?1")
+    @Query("select u from tbl_user u where u.role = ?1")
     List<User> findByRoleIs(User.Role role);
-    @Query("select count(u) from User u where upper(u.role) = upper(?1)")
+    @Query("select count(u) from tbl_user u where upper(u.role) = upper(?1)")
     long countByRoleIsIgnoreCase(String role);
-    @Query("select u from User u where upper(u.email) = upper(?1)")
+    @Query("select u from tbl_user u where upper(u.email) = upper(?1)")
     Optional<User> findByEmailEqualsIgnoreCase(String email);
     boolean existsByEmail(String email);
 
+    Optional<User> findByPinAndStudentId(String pin, String studentId);
 }
 

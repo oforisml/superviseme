@@ -4,9 +4,11 @@ package com.example.superviseme.service;
 import com.example.superviseme.entities.StudentProfile;
 import com.example.superviseme.entities.User;
 import com.example.superviseme.record.StudentRegistrationDto;
+import com.example.superviseme.record.StudentProfileRecord;
 import com.example.superviseme.repository.StudentProfileRepository;
 import com.example.superviseme.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.util.UUID;
 
 @Service
 @Transactional
+@Getter
+@Setter
 public class UserService {
 
     private final UserRepository userRepository;
@@ -91,50 +95,62 @@ public class UserService {
         return savedProfile;
     }
 
-    public StudentProfile updateStudentProfile(UUID userId, StudentProfile studentProfileDetails) {
-        User user = findById(userId);
-        StudentProfile studentProfile = studentProfileRepository.findByUserIs(user)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+    public ResponseEntity<User> updateStudentProfile(StudentProfileRecord record) {
 
+        // Student record Id
+        User user = findById(record.id());
+
+
+        // Updating User record
+        if (record.email() != null) {
+            user.setEmail(record.email());
+        }
+
+        if (record.phoneNumber() != null) {
+            user.setPhoneNumber(record.phoneNumber());
+        }
+
+        if (record.isActive() != null) {
+            user.setActive(record.isActive());
+        }
+
+
+
+
+
+        StudentProfile studentProfile = user.getStudentProfile();
+        if(studentProfile.getId() == null )
+            studentProfile = new StudentProfile();
         // Update allowed fields
-        if (studentProfileDetails.getFullName() != null) {
-            studentProfile.setFullName(studentProfileDetails.getFullName());
-        }
-        if (studentProfileDetails.getStudentId() != null) {
-            // Check if student ID is unique (if changing)
-            if (!studentProfileDetails.getStudentId().equals(studentProfile.getStudentId())) {
-                if (studentProfileRepository.findByStudentIdIs(studentProfileDetails.getStudentId()).isPresent()) {
-                    throw new RuntimeException("Student ID already exists: " + studentProfileDetails.getStudentId());
-                }
-                studentProfile.setStudentId(studentProfileDetails.getStudentId());
-            }
-        }
-        if (studentProfileDetails.getResearchArea() != null) {
-            studentProfile.setResearchArea(studentProfileDetails.getResearchArea());
-        }
-        if (studentProfileDetails.getResearchTopic() != null) {
-            studentProfile.setResearchTopic(studentProfileDetails.getResearchTopic());
-        }
-        if (studentProfileDetails.getThesisTitle() != null) {
-            studentProfile.setThesisTitle(studentProfileDetails.getThesisTitle());
-        }
-        if (studentProfileDetails.getAbstractText() != null) {
-            studentProfile.setAbstractText(studentProfileDetails.getAbstractText());
-        }
-        if (studentProfileDetails.getResearchObjectives() != null) {
-            studentProfile.setResearchObjectives(studentProfileDetails.getResearchObjectives());
-        }
-        if (studentProfileDetails.getEnrollmentDate() != null) {
-            studentProfile.setEnrollmentDate(studentProfileDetails.getEnrollmentDate());
-        }
-        if (studentProfileDetails.getExpectedGraduationDate() != null) {
-            studentProfile.setExpectedGraduationDate(studentProfileDetails.getExpectedGraduationDate());
-        }
-        if (studentProfileDetails.getCurrentSemester() != null) {
-            studentProfile.setCurrentSemester(studentProfileDetails.getCurrentSemester());
+        if (record.fullName() != null) {
+            studentProfile.setFullName(record.fullName());
         }
 
-        return studentProfileRepository.save(studentProfile);
+        if(record.programType() != null)
+            studentProfile.setProgramType(record.programType());
+
+        if (record.researchArea() != null) {
+            studentProfile.setResearchArea(record.researchArea());
+        }
+        if (record.lectureAlignment() != null) {
+            studentProfile.setLectureAlignment(record.lectureAlignment());
+        }
+        if (record.thesisTitle() != null) {
+            studentProfile.setResearchTopic(record.thesisTitle());
+        }
+
+        if (record.abstractText() != null) {
+            studentProfile.setAbstractText(record.abstractText());
+        }
+        if (record.researchObjective() != null) {
+            studentProfile.setResearchObjectives(record.researchObjective());
+        }
+
+        studentProfileRepository.save(studentProfile);
+
+        user = findById(record.id());
+
+        return ResponseEntity.ok(user);
     }
 
     public StudentProfile getStudentProfile(UUID userId) {
@@ -145,13 +161,14 @@ public class UserService {
 
 
     // Utility Methods
-    public Object getProfileByRole(UUID userId) {
+    public ResponseEntity<Object> getProfileByRole(UUID userId) {
         User user = findById(userId);
-        return switch (user.getRole()) {
+        Object response =  switch (user.getRole()) {
             case STUDENT -> getStudentProfile(userId);
 //            case SUPERVISOR -> getSupervisorProfile(userId);
 //            case ADMIN -> getAdminProfile(userId);
         };
+        return ResponseEntity.ok(response);
     }
 
     public boolean hasProfile(UUID userId) {
@@ -165,8 +182,8 @@ public class UserService {
 
     public boolean existsByStudentIdAndPin(StudentRegistrationDto dto) {
 
-        return userRepository.findByPinIsAndStudentIdIs(dto.pin(), dto.studentId())
-                .map(User::getIsActive)
+        return userRepository.findByPinEqualsAndStudentIdEquals(dto.pin(), dto.studentId())
+                .map(User::getActive)
                 .orElse(false);
     }
 
@@ -174,7 +191,7 @@ public class UserService {
     public ResponseEntity<?> intializeStudentCreation(StudentRegistrationDto request) {
         // Check if the student exists
 
-        Optional<User> optionalUser = userRepository.findByPinIsAndStudentIdIs(request.pin(), request.studentId());
+        Optional<User> optionalUser = userRepository.findByPinAndStudentId(request.pin(), request.studentId());
         if(optionalUser.isPresent()){
             return ResponseEntity.ok(optionalUser.get());
         }
@@ -182,7 +199,7 @@ public class UserService {
         User user = new User();
         user.setPin(request.pin());
         user.setStudentId(request.studentId());
-        user = userRepository.save(user);
+        user = createUser(user);
         return ResponseEntity.ok(user);
     }
 }

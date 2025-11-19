@@ -11,11 +11,11 @@ import java.util.UUID;
 
 @Repository
 public interface StudentProfileRepository extends JpaRepository<StudentProfile, UUID> {
-    @Query("select (count(s) > 0) from StudentProfile s where s.studentId = ?1")
+    @Query("select (count(s) > 0) from tbl_student_profile s where s.studentId = ?1")
     boolean existsByStudentIdIs(String studentId);
 
-    @Query("select s from StudentProfile s where s.studentId = ?1")
+    @Query("select s from tbl_student_profile s where s.studentId = ?1")
     Optional<StudentProfile> findByStudentIdIs(String studentId);
-    @Query("select s from StudentProfile s where s.user = ?1")
+    @Query("select s from tbl_student_profile s where s.user = ?1")
     Optional<StudentProfile> findByUserIs(User user);
 }
