@@ -7,7 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "resource")
+@Entity(name = "tbl_resource")
 @Table
 public class Resource {
     @Id
@@ -15,6 +15,10 @@ public class Resource {
     private UUID id;
     private String fileType;
     private String fileName;
+
+    @ManyToOne
+    @JoinColumn(name = "submission_id")
+    private Submission submission;
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -29,23 +29,6 @@ public class User {
 //    @Column(columnDefinition = "role")
 //    @Type(PostgreSQLEnumType.class)
     private Role role;
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", pin='" + pin + '\'' +
-                ", studentId='" + studentId + '\'' +
-                ", role=" + role +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", isActive=" + isActive +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", studentProfile=" + studentProfile +
-                '}';
-    }
-
     @Column(name = "phone_number")
     private String phoneNumber;
     @Column(name = "is_active")
@@ -147,5 +130,20 @@ public class User {
 //    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    private AdminProfile adminProfile;
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", pin='" + pin + '\'' +
+                ", studentId='" + studentId + '\'' +
+                ", role=" + role +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", isActive=" + isActive +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", studentProfile=" + studentProfile +
+                '}';
+    }
 
 }

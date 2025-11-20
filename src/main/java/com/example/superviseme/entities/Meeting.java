@@ -6,16 +6,13 @@ import java.util.UUID;
 import com.example.superviseme.enums.MeetingDuration;
 import com.example.superviseme.enums.MeetingType;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-@Entity
+@Entity(name = "tbl_meeting")
+@Table
 @Data
 public class Meeting {
 	
@@ -39,7 +36,11 @@ public class Meeting {
 	
 	@Column(nullable = false)
 	private String agenda;
-	
-	
+
+	@CreationTimestamp
+	private LocalDateTime createdAt;
+
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
 
 }
