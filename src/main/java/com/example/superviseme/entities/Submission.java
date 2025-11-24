@@ -20,6 +20,7 @@ public class Submission  {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    
     private String summary;
 
     @Column(nullable = false)

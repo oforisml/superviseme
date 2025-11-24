@@ -1,13 +1,13 @@
 package com.example.superviseme.repository;
 
-import com.example.superviseme.entities.StudentChapter;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
+import com.example.superviseme.entities.Chapter;
 
 @Repository
-public interface StudentChapterRepository extends JpaRepository<StudentChapter, UUID> {
-
+public interface ChapterRepository extends JpaRepository<Chapter, UUID>{
 
 }
