@@ -23,7 +23,7 @@ public class UserController {
 
     @PostMapping(value = "/")
     public ResponseEntity<?> saveUser(@RequestBody StudentRegistrationDto request){
-        return userService.intializeStudentCreation(request);
+        return userService.initializeStudentCreation(request);
     }
 
     @PutMapping(value = "/")

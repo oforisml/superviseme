@@ -22,10 +22,9 @@ public class Chapter {
     private UUID nextChapter;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "id", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
     @JsonBackReference
-
-    private Set<StudentChapter> submissions;
+    private Set<StudentChapter> studentChapters;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

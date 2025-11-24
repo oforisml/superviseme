@@ -1,5 +1,8 @@
 package com.example.superviseme.restcontrollers;
 
+import com.example.superviseme.entities.Document;
+import com.example.superviseme.repository.DocumentRepository;
+import com.example.superviseme.service.DocumentService;
 import com.example.superviseme.service.FileStorageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.Resource;
@@ -14,6 +17,7 @@ import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequestMapping(name = "Resources Controller", value = "/resource")
@@ -26,23 +30,24 @@ public class ResourcesController {
 
     private final FileStorageService fileService;
 
-    public ResourcesController(FileStorageService fileService) {
+    public ResourcesController(DocumentService repository, FileStorageService fileService) {
         this.fileService = fileService;
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        String filename = fileService.saveFile(file);
+        Document filename = fileService.saveFile(file);
         return ResponseEntity.ok("Uploaded: " + filename);
     }
 
-    @GetMapping
+    @GetMapping(value = "/")
     public ResponseEntity<List<String>> listFiles() throws IOException {
         List<String> files = fileService.loadAll()
                 .map(Path::toString)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(files);
     }
+
 
     @GetMapping("/{filename}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String filename) throws MalformedURLException {
@@ -67,5 +72,13 @@ public class ResourcesController {
             return ResponseEntity.ok("Deleted: " + filename);
         return ResponseEntity.badRequest().body("File not found: " + filename);
     }
+
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<?> getFileById(@PathVariable(name = "id") UUID id) throws IOException {
+        Document files = fileService.findById(id);
+        return ResponseEntity.ok(files);
+    }
+
+
 
 }

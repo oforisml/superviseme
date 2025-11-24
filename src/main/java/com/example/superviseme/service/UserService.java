@@ -4,14 +4,18 @@ package com.example.superviseme.service;
 import com.example.superviseme.entities.StudentProfile;
 import com.example.superviseme.entities.User;
 import com.example.superviseme.enums.Role;
+import com.example.superviseme.record.StudentLoginCheck;
+import com.example.superviseme.record.StudentRecord;
 import com.example.superviseme.record.StudentRegistrationDto;
 import com.example.superviseme.record.StudentProfileRecord;
 import com.example.superviseme.repository.StudentProfileRepository;
 import com.example.superviseme.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -25,13 +29,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final StudentChapterService studentChapterService;
 
 
-    public UserService(UserRepository userRepository,
-                       StudentProfileRepository studentProfileRepository
-    ) {
+    public UserService(UserRepository userRepository, StudentProfileRepository studentProfileRepository, StudentChapterService studentChapterService) {
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
+        this.studentChapterService = studentChapterService;
     }
 
     // Core User Methods
@@ -40,19 +44,16 @@ public class UserService {
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmailEqualsIgnoreCase(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return userRepository.findByEmailEqualsIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
     public User findById(UUID id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
 
     public void deleteUser(UUID id) {
-        User user = findById(id);
-        userRepository.delete(user);
+        userRepository.deleteById(id);
     }
 
     public boolean existsByEmail(String email) {
@@ -81,8 +82,7 @@ public class UserService {
         }
 
         // Check if student ID is unique
-        if (studentProfile.getStudentId() != null &&
-                studentProfileRepository.findByStudentIdIs(studentProfile.getStudentId()).isPresent()) {
+        if (studentProfile.getStudentId() != null && studentProfileRepository.findByStudentIdIs(studentProfile.getStudentId()).isPresent()) {
             throw new RuntimeException("Student ID already exists: " + studentProfile.getStudentId());
         }
 
@@ -103,35 +103,38 @@ public class UserService {
 
 
         // Updating User record
-        if (record.email() != null) {
-            user.setEmail(record.email());
+        if (record.email() != null && !existsByEmail(record.email().trim())) {
+            user.setEmail(record.email().trim());
+        } else {
+            throw new RuntimeException("Email already taken");
         }
 
         if (record.phoneNumber() != null) {
             user.setPhoneNumber(record.phoneNumber());
         }
 
-        if (record.isActive() != null) {
-            user.setActive(record.isActive());
-        }
 
         if (record.role() != null) {
             user.setRole(record.role());
         }
 
 
-
-
         StudentProfile studentProfile = user.getStudentProfile();
-        if(studentProfile == null || studentProfile.getId() == null )
-            studentProfile = new StudentProfile();
+        if (studentProfile == null || studentProfile.getId() == null) studentProfile = new StudentProfile();
         // Update allowed fields
         if (record.fullName() != null) {
             studentProfile.setFullName(record.fullName());
         }
 
-        if(record.programType() != null)
-            studentProfile.setProgramType(record.programType());
+        if (record.isActive() != null) {
+            // Activating student profile
+            studentProfile.setIsActive(record.isActive());
+
+            // todo: Student Create chapter 1 for the new user
+
+        }
+
+        if (record.programType() != null) studentProfile.setProgramType(record.programType());
 
         if (record.researchArea() != null) {
             studentProfile.setResearchArea(record.researchArea());
@@ -144,7 +147,6 @@ public class UserService {
         }
 
         studentProfile.setStudentId(user.getStudentId());
-
 
 
         if (record.abstractText() != null) {
@@ -164,15 +166,14 @@ public class UserService {
 
     public StudentProfile getStudentProfile(UUID userId) {
         User user = findById(userId);
-        return studentProfileRepository.findByUserIs(user)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+        return studentProfileRepository.findByUserIs(user).orElseThrow(() -> new RuntimeException("Student profile not found"));
     }
 
 
     // Utility Methods
     public ResponseEntity<Object> getProfileByRole(UUID userId) {
         User user = findById(userId);
-        Object response =  switch (user.getRole()) {
+        Object response = switch (user.getRole()) {
             case STUDENT -> getStudentProfile(userId);
 //            case SUPERVISOR -> getSupervisorProfile(userId);
 //            case ADMIN -> getAdminProfile(userId);
@@ -189,27 +190,64 @@ public class UserService {
         };
     }
 
-    public boolean existsByStudentIdAndPin(StudentRegistrationDto dto) {
 
-        return userRepository.findByPinEqualsAndStudentIdEquals(dto.pin(), dto.studentId())
-                .map(User::getActive)
-                .orElse(false);
+    public StudentLoginCheck existsByStudentIdAndPin(StudentRegistrationDto dto) {
+        // Check if user exist
+        Optional<User> optional = userRepository.findByPinEqualsAndStudentIdEquals(dto.pin(), dto.studentId());
+
+        // Set default return parameters
+        boolean isUserCreated = false;
+        boolean isUserProfileCreated = false;
+        boolean isUserProfileActive = false;
+        User user = new User();
+
+        // Actual return parameters
+        if (optional.isPresent()) {
+
+            // if user exists
+            isUserCreated = true;
+            user = optional.get();
+
+            // if Profile exists
+            if (optional.get().getStudentProfile() != null) {
+                isUserProfileCreated = true;
+
+                // Get profile status
+                isUserProfileActive = optional.get().getStudentProfile().getIsActive();
+            }
+        }
+
+        return new StudentLoginCheck(isUserCreated, isUserProfileCreated, isUserProfileActive, user);
     }
 
 
-    public ResponseEntity<?> intializeStudentCreation(StudentRegistrationDto request) {
-        // Check if the student exists
+    // todo: handle errors
+    public ResponseEntity<?> initializeStudentCreation(StudentRegistrationDto dto) {
 
-        Optional<User> optionalUser = userRepository.findByPinAndStudentId(request.pin(), request.studentId());
-        if(optionalUser.isPresent()){
-            return ResponseEntity.ok(optionalUser.get());
+        StudentLoginCheck student = existsByStudentIdAndPin(dto);
+        StudentRecord studentRecord;
+
+        // if user exists and profile is active, return it
+        if (student.isStudentCreated()) {
+            studentRecord = new StudentRecord(student.user().getId(), student.user().getStudentId(), student.user().getRole(), student.user().getStudentProfile(), student.isStudentCreated(), student.isStudentProfileCreated(), student.isStudentProfileActive());
+        } else {
+            // Create the user object
+            User user = new User();
+            user.setPin(dto.pin());
+            user.setStudentId(dto.studentId());
+            user.setRole(Role.STUDENT);
+
+            // Save the user object
+            user = createUser(user);
+
+
+            // Build the return object
+            studentRecord = new StudentRecord(user.getId(), user.getStudentId(), user.getRole(), user.getStudentProfile(), true, false, false);
         }
 
-        User user = new User();
-        user.setPin(request.pin());
-        user.setStudentId(request.studentId());
-        user = createUser(user);
-        user.setRole(Role.STUDENT);
-        return ResponseEntity.ok(user);
+
+        return ResponseEntity.ok(studentRecord);
+
+
     }
 }

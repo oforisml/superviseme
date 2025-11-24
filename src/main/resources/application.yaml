@@ -27,8 +27,8 @@ spring:
     swagger-ui:
       path: /swagger-ui.html
     show-actuator: true
-    packages-to-scan: com.example.superviseme.restcontrollers
-    paths-to-match: /**
+#    packages-to-scan: com.example.superviseme.restcontrollers
+#    paths-to-match: /**
 
   management:
     endpoints:
