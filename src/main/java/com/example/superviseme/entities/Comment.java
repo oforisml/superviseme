@@ -12,6 +12,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    
     private String comment;
 
     @ManyToOne
