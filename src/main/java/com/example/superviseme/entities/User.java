@@ -2,9 +2,10 @@ package com.example.superviseme.entities;
 
 import com.example.superviseme.enums.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import io.hypersistence.utils.hibernate.type.basic.PostgreSQLEnumType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -21,6 +22,8 @@ public class User {
     @Column(unique = true, nullable = true)
     private String email;
     private String pin;
+
+    @Column(unique = true)
     private String studentId;
 
     @Enumerated(EnumType.STRING)
@@ -31,7 +34,7 @@ public class User {
     private String phoneNumber;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonBackReference
+    @ToString.Exclude
     private StudentProfile studentProfile;
 
     @CreationTimestamp

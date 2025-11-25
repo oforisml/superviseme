@@ -31,6 +31,7 @@ public class GeneralExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseRecord> handleGeneralException(Exception exception){
+        exception.printStackTrace();
         return new ResponseEntity<>(
                 new ResponseRecord(500, exception.getMessage(), null, LocalDateTime.now()),
                 HttpStatus.INTERNAL_SERVER_ERROR

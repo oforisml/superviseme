@@ -1,18 +1,25 @@
 package com.example.superviseme.service;
 
 
+import com.example.superviseme.entities.Chapter;
+import com.example.superviseme.entities.StudentChapter;
 import com.example.superviseme.entities.StudentProfile;
 import com.example.superviseme.entities.User;
 import com.example.superviseme.enums.Role;
+import com.example.superviseme.enums.StudentChapterStatus;
+import com.example.superviseme.exceptionhandler.ResourceNotFoundException;
 import com.example.superviseme.record.StudentLoginCheck;
 import com.example.superviseme.record.StudentRecord;
 import com.example.superviseme.record.StudentRegistrationDto;
 import com.example.superviseme.record.StudentProfileRecord;
+import com.example.superviseme.repository.ChapterRepository;
+import com.example.superviseme.repository.StudentChapterRepository;
 import com.example.superviseme.repository.StudentProfileRepository;
 import com.example.superviseme.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +29,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional
 @Getter
 @Setter
 public class UserService {
@@ -31,11 +37,19 @@ public class UserService {
     private final StudentProfileRepository studentProfileRepository;
     private final StudentChapterService studentChapterService;
 
+    @Value("${chapter.first}")
+    private UUID chapterOneId;
+    private final ChapterRepository chapterRepository;
+    private final StudentChapterRepository studentChapterRepository;
 
-    public UserService(UserRepository userRepository, StudentProfileRepository studentProfileRepository, StudentChapterService studentChapterService) {
+    public UserService(UserRepository userRepository, StudentProfileRepository studentProfileRepository, StudentChapterService studentChapterService,
+                       ChapterRepository chapterRepository,
+                       StudentChapterRepository studentChapterRepository) {
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.studentChapterService = studentChapterService;
+        this.chapterRepository = chapterRepository;
+        this.studentChapterRepository = studentChapterRepository;
     }
 
     // Core User Methods
@@ -48,7 +62,8 @@ public class UserService {
     }
 
     public User findById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return userRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("User not found with id: " + id));
     }
 
 
@@ -96,17 +111,21 @@ public class UserService {
         return savedProfile;
     }
 
-    public ResponseEntity<User> updateStudentProfile(StudentProfileRecord record) {
+    @Transactional
+    public ResponseEntity<?> updateStudentProfile(StudentProfileRecord record) {
 
         // Student record Id
         User user = findById(record.id());
 
+        boolean isUserCreated = true;
+        boolean isUserProfileActive = false;
 
         // Updating User record
-        if (record.email() != null && !existsByEmail(record.email().trim())) {
+        if (record.email() != null) {
+             if (existsByEmail(record.email().trim()))
+                 throw new RuntimeException("Email already taken");
+
             user.setEmail(record.email().trim());
-        } else {
-            throw new RuntimeException("Email already taken");
         }
 
         if (record.phoneNumber() != null) {
@@ -120,7 +139,11 @@ public class UserService {
 
 
         StudentProfile studentProfile = user.getStudentProfile();
-        if (studentProfile == null || studentProfile.getId() == null) studentProfile = new StudentProfile();
+
+        // Checking if user has profile
+        if (studentProfile == null || studentProfile.getId() == null)
+            studentProfile = new StudentProfile();
+
         // Update allowed fields
         if (record.fullName() != null) {
             studentProfile.setFullName(record.fullName());
@@ -130,8 +153,20 @@ public class UserService {
             // Activating student profile
             studentProfile.setIsActive(record.isActive());
 
-            // todo: Student Create chapter 1 for the new user
 
+            if(record.isActive()){
+                StudentChapter studentChapter = new StudentChapter();
+                studentChapter.setStudentId(user.getStudentId());
+                studentChapter.setStatus(StudentChapterStatus.OPENED);
+
+                Chapter chapter = chapterRepository.findById(chapterOneId)
+                        .orElseThrow(() -> new RuntimeException("Chapter One ID does not exist"));
+                studentChapter.setChapter(chapter);
+                studentChapter = studentChapterService.persist(studentChapter);
+
+            }
+
+            isUserProfileActive = record.isActive();
         }
 
         if (record.programType() != null) studentProfile.setProgramType(record.programType());
@@ -160,8 +195,12 @@ public class UserService {
         user = userRepository.save(user);
 
         studentProfile.setUser(user);
-        studentProfileRepository.save(studentProfile);
-        return ResponseEntity.ok(findById(user.getId()));
+        studentProfile = studentProfileRepository.save(studentProfile);
+
+        StudentRecord rec = new StudentRecord(user.getId(), user.getStudentId(), user.getRole()
+        , studentProfile, isUserCreated, true, isUserProfileActive);
+
+        return ResponseEntity.ok(rec);
     }
 
     public StudentProfile getStudentProfile(UUID userId) {
@@ -170,16 +209,6 @@ public class UserService {
     }
 
 
-    // Utility Methods
-    public ResponseEntity<Object> getProfileByRole(UUID userId) {
-        User user = findById(userId);
-        Object response = switch (user.getRole()) {
-            case STUDENT -> getStudentProfile(userId);
-//            case SUPERVISOR -> getSupervisorProfile(userId);
-//            case ADMIN -> getAdminProfile(userId);
-        };
-        return ResponseEntity.ok(response);
-    }
 
     public boolean hasProfile(UUID userId) {
         User user = findById(userId);
@@ -221,9 +250,11 @@ public class UserService {
     }
 
 
-    // todo: handle errors
+
+
     public ResponseEntity<?> initializeStudentCreation(StudentRegistrationDto dto) {
 
+        // Fetching for student and checking if profile of student is already created
         StudentLoginCheck student = existsByStudentIdAndPin(dto);
         StudentRecord studentRecord;
 
@@ -244,10 +275,12 @@ public class UserService {
             // Build the return object
             studentRecord = new StudentRecord(user.getId(), user.getStudentId(), user.getRole(), user.getStudentProfile(), true, false, false);
         }
-
-
         return ResponseEntity.ok(studentRecord);
+    }
 
-
+    public ResponseEntity<?> getUser(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new ResourceNotFoundException("User not found"));
+        return ResponseEntity.ok(user);
     }
 }

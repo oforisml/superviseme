@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CommentService {
@@ -30,5 +31,9 @@ public class CommentService {
 
     public Comment persistComment(Comment comment){
         return repository.save(comment);
+    }
+
+    public List<Comment> findAllBySubmissionId(UUID id) {
+        return repository.findBySubmission_IdEquals(id);
     }
 }

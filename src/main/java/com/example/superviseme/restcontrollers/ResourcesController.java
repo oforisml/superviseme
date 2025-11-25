@@ -1,21 +1,18 @@
 package com.example.superviseme.restcontrollers;
 
 import com.example.superviseme.entities.Document;
-import com.example.superviseme.repository.DocumentRepository;
-import com.example.superviseme.service.DocumentService;
+import com.example.superviseme.exceptionhandler.ResourceNotFoundException;
 import com.example.superviseme.service.FileStorageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.MalformedURLException;
-import java.nio.file.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,38 +27,34 @@ public class ResourcesController {
 
     private final FileStorageService fileService;
 
-    public ResourcesController(DocumentService repository, FileStorageService fileService) {
+    public ResourcesController( FileStorageService fileService) {
         this.fileService = fileService;
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        Document filename = fileService.saveFile(file);
-        return ResponseEntity.ok("Uploaded: " + filename);
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        Document document = fileService.saveFile(file);
+        return ResponseEntity.ok(document);
     }
 
     @GetMapping(value = "/")
-    public ResponseEntity<List<String>> listFiles() throws IOException {
-        List<String> files = fileService.loadAll()
-                .map(Path::toString)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(files);
+    public ResponseEntity<?> listFiles() throws IOException {
+
+        List<Document> documents = fileService.findAll();
+        return ResponseEntity.ok(documents);
     }
 
 
-    @GetMapping("/{filename}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String filename) throws MalformedURLException {
-        Path path = fileService.load(filename);
-        Resource resource = new UrlResource(path.toUri());
+    @GetMapping(value = "/download/{id}")
+    public ResponseEntity<?> downloadFile(@PathVariable(name = "id") UUID id)
+            throws MalformedURLException {
+        return fileService.download(id);
+    }
 
-        if (!resource.exists()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<?> getFileById(@PathVariable(name = "id") UUID id) {
+        Document files = fileService.findById(id);
+        return ResponseEntity.ok(files);
     }
 
     @DeleteMapping("/{filename}")
@@ -70,15 +63,8 @@ public class ResourcesController {
 
         if (deleted)
             return ResponseEntity.ok("Deleted: " + filename);
-        return ResponseEntity.badRequest().body("File not found: " + filename);
+        throw new ResourceNotFoundException("File not found");
     }
-
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getFileById(@PathVariable(name = "id") UUID id) throws IOException {
-        Document files = fileService.findById(id);
-        return ResponseEntity.ok(files);
-    }
-
 
 
 }

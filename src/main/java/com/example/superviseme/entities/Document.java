@@ -1,17 +1,20 @@
 package com.example.superviseme.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "tbl_resource")
 @Table
 @Data
-public class Document {
+public class Document implements Serializable {
     @Id
     @GeneratedValue( strategy = GenerationType.AUTO)
     private UUID id;
@@ -20,8 +23,10 @@ public class Document {
 
     private String generatedFileName;
 
-    @ManyToOne
-    @JoinColumn(name = "submission_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonBackReference
+    @JoinColumn(name = "submission_id", referencedColumnName = "id")
     private Submission submission;
     @CreationTimestamp
     @Column(name = "created_at")

@@ -1,7 +1,9 @@
 package com.example.superviseme.record;
 
+import java.util.UUID;
+
 public record ChapterRecord(
-		String uuid,
+		UUID id,
 		String name,
-		String nextChapterId
+		UUID nextChapterId
 		) { }

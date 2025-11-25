@@ -1,8 +1,10 @@
 package com.example.superviseme.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,7 +19,8 @@ public class StudentProfile {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @JsonManagedReference
+    @ToString.Exclude
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -28,7 +31,7 @@ public class StudentProfile {
     private String studentId;
 
     @Column(name = "is_active")
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @Column(name = "full_name")
     private String fullName;
@@ -39,25 +42,8 @@ public class StudentProfile {
     @Column(name = "research_topic")
     private String researchTopic;
 
-    @Override
-    public String toString() {
-        return "StudentProfile{" +
-                "id=" + id +
-                ", user=" + user +
-                ", programType='" + programType + '\'' +
-                ", studentId='" + studentId + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", researchArea='" + researchArea + '\'' +
-                ", researchTopic='" + researchTopic + '\'' +
-                ", abstractText='" + abstractText + '\'' +
-                ", researchObjectives='" + researchObjectives + '\'' +
-                ", lectureAlignment='" + lectureAlignment + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 
-    @Column
+    @Column(length = 5000)
     private String abstractText;
 
     @Column(name = "research_objectives")

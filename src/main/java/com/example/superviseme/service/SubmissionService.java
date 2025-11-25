@@ -13,7 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -42,18 +46,17 @@ public class SubmissionService {
         submission.setStatus(SubmissionStatus.PENDING);
 
 
-        submission = repository.saveAndFlush(submission);
 
         // Persisting the file
         Document document = fileStorageService.saveFile(record.file());
 
-        document.setSubmission(submission);
-        fileStorageService.persistDocument(document);
+        submission.getResources().add(document);
 
-        submission = repository.findById(submission.getId()).get();
+        submission = repository.saveAndFlush(submission);
 
         return ResponseEntity.ok(submission);
     }
+
 
     public ResponseEntity<?> update(UUID id, SubmissionRecord record) {
         // validate Id exists
@@ -63,22 +66,45 @@ public class SubmissionService {
         Submission submission = repository.findById(id)
                 .orElseThrow(() ->new ResourceNotFoundException("Submission not found for id: "+ id));
 
-        if(record.status() != null )
+        if(record.status() != null ){
             submission.setStatus(record.status());
+            if(record.status().equals(SubmissionStatus.ACCEPTED)){
+                studentChapterService.advanceStudentChapter(submission.getStudentChapter());
+            }
+
+        }
 
         submission = repository.save(submission);
 
         if(record.comment() != null){
             Comment comment = new Comment();
             comment.setComment(record.comment());
-            comment.setSubmission(submission);
             comment = commentService.persistComment(comment);
+
+            submission.getComments().add(comment);
+
+            submission = repository.save(submission);
 
             System.out.println(comment.getComment());
         }
 
-        submission = repository.findById(id).get();
+
         return ResponseEntity.ok(submission);
 
+    }
+
+    public ResponseEntity<?> getSubmission(UUID id) {
+        Submission submission = repository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Submission not found"));
+
+        // Add to submission
+        Set<Document> documents = new HashSet<>(fileStorageService.findAllBySubmissionId(submission.getId()));
+        submission.setResources(documents);
+
+        // Add comments to submission
+        Set<Comment> comments = new HashSet<>(commentService.findAllBySubmissionId(id));
+        submission.setComments(comments);
+
+        return ResponseEntity.ok(submission);
     }
 }

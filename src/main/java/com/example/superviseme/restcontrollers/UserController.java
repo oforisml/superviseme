@@ -33,7 +33,7 @@ public class UserController {
 
     @GetMapping(value = "/{userId}")
     public ResponseEntity<?> getProfile(@PathVariable(name = "userId") UUID userId){
-        return userService.getProfileByRole(userId);
+        return userService.getUser(userId);
     }
 
     @DeleteMapping(value = "/{userId}")

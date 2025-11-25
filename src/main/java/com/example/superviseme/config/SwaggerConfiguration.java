@@ -29,5 +29,4 @@ public class SwaggerConfiguration {
                         .license(new License().name("Draka"))
                         .version("2.0"));
     }
-   
 }
