@@ -3,6 +3,7 @@ package com.example.superviseme.service;
 import com.example.superviseme.entities.Chapter;
 import com.example.superviseme.entities.StudentChapter;
 import com.example.superviseme.enums.StudentChapterStatus;
+import com.example.superviseme.enums.SubmissionStatus;
 import com.example.superviseme.repository.StudentChapterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
@@ -66,5 +67,15 @@ public class StudentChapterService {
 
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
+    }
+    
+    public ResponseEntity<?> getCurrentStage(String studentId){
+    	List<StudentChapter> studentChapters = repository.findByStudentIdAndStatus(studentId,StudentChapterStatus.OPENED);
+    	return ResponseEntity.ok(studentChapters);    
+    }
+    
+    public ResponseEntity<?> getCompletedChapters(String studentId){
+    	List<StudentChapter> studentChapters = repository.findByStudentIdAndStatus(studentId,StudentChapterStatus.CLOSED);
+    	return ResponseEntity.ok(studentChapters);    
     }
 }

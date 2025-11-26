@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,6 +27,10 @@ public class Chapter {
     private String name; //Added this to know which particular chapter we are working on
 
     private UUID nextChapterId;
+    
+    @Column(nullable = false)
+    @ColumnDefault("1")
+    private int stage;
 
     @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
     @JsonManagedReference

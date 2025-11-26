@@ -45,5 +45,15 @@ public class SubmissionController {
     public ResponseEntity<?> getSubmission(@PathVariable(name = "id")UUID id){
         return service.getSubmission(id);
     }
+    
+    @GetMapping(value = "/{studentChapterId}/pending")
+    public ResponseEntity<?> getPendingSubmissions(@PathVariable String studentChapterId ){
+        return service.getPendingSubmissions(UUID.fromString(studentChapterId));
+    }
+    
+    @GetMapping(value = "/{studentChapterId}/recent")
+    public ResponseEntity<?> getRecentSubmissions(@PathVariable String studentChapterId ){
+        return service.getRecentSubmissions(UUID.fromString(studentChapterId));
+    }
 
 }

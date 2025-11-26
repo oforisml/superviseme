@@ -43,6 +43,8 @@ public class ChapterService {
         if (chapterDto.name() != null) {
             chapter.setName(chapterDto.name());
         }
+        
+        chapter.setStage(chapterDto.stage());
 
         chapter = chapterRepository.save(chapter);
         return ResponseEntity.ok(chapter);

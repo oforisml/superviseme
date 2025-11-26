@@ -61,6 +61,14 @@ public class MeetingService {
 		
 	}
 	
+	public ResponseEntity<?> getPendingMeetings(){
+		List<Meeting> meeting =  meetingRepository.findByMeetingStartAfter(LocalDateTime.now());
+		if(!meeting.isEmpty()) {
+			return ResponseEntity.ok(meeting.size());
+		}
+		return ResponseEntity.ok(0);
+	}
+	
 	private boolean overlaps(Meeting meeting,LocalDateTime newStart, Duration newDuration) {
         LocalDateTime newEnd = newStart.plus(newDuration);
         return !newEnd.isBefore(meeting.getMeetingStart()) && !newStart.isAfter(meeting.getMeetingStart().plus(meeting.getMeetingDuration().getDuration()));

@@ -1,6 +1,7 @@
 package com.example.superviseme.restcontrollers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,5 +24,10 @@ public class MeetingController {
     public ResponseEntity<?> saveMeeting(@RequestBody MeetingRecord meetingDto){
         return meetingService.createMeeting(meetingDto);
     }
+	
+	@GetMapping(value = "/pending")
+	public ResponseEntity<?> getPendingMeetings(){
+		return meetingService.getPendingMeetings();
+	}
 
 }

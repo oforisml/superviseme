@@ -107,4 +107,17 @@ public class SubmissionService {
 
         return ResponseEntity.ok(submission);
     }
+    
+    public ResponseEntity<?> getPendingSubmissions(UUID studentChapterId){
+    	List<Submission> submissions = repository.findByStudentChapterIdAndStatus(studentChapterId, SubmissionStatus.PENDING);
+    	if(!submissions.isEmpty()) {
+    		return ResponseEntity.ok(submissions.size());
+    	}
+    	return ResponseEntity.ok(0);
+    }
+    
+    public ResponseEntity<?> getRecentSubmissions(UUID studentChapterId){
+    	List<Submission> submissions = repository.findByStudentChapterIdOrderByCreatedAtDesc(studentChapterId);
+    	return ResponseEntity.ok(submissions);
+    }
 }
