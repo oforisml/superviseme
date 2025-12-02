@@ -22,7 +22,8 @@ public class Meeting {
 	
 	@Column(nullable = false)
 	private LocalDateTime meetingStart;
-	
+
+	private String studentId;
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private MeetingDuration meetingDuration;

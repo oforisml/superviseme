@@ -28,6 +28,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This class manages the user creation.
+ * for now only the {@link Role#STUDENT} was managed for the first iteration
+ * @author Samuel Ofori
+ */
 @Service
 @Getter
 @Setter

@@ -1,5 +1,7 @@
 package com.example.superviseme.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +17,9 @@ public class Comment {
     
     private String comment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonBackReference
     @JoinColumn(name = "submission_id", referencedColumnName = "id")
     private Submission submission;
 

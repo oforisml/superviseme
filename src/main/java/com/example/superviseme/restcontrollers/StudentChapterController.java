@@ -2,13 +2,12 @@ package com.example.superviseme.restcontrollers;
 
 import com.example.superviseme.service.StudentChapterService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/student-chapter/student/")
+@CrossOrigin(origins = "*")
+
 public class StudentChapterController {
     private final StudentChapterService service;
 

@@ -32,6 +32,8 @@ public class Submission  {
     private SubmissionStatus status;
 
     @OneToMany(mappedBy = "submission", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @JsonManagedReference
     private Set<Comment> comments = new HashSet<>();
 
     @OneToMany(mappedBy = "submission", fetch = FetchType.EAGER)

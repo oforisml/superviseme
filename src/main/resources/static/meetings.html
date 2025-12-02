@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — DRAKA</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --sidebar-w: 260px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7b8896;
+      --accent:#2f6ee8;
+      --soft:#eef6ff;
+      --border:#e6ecf5;
+      --radius:12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:#0f1724;
+      display:flex;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+      font-size:14px;
+    }
+
+    /* Layout */
+    .app {
+      display:flex;
+      width:100%;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width:var(--sidebar-w);
+      min-width:var(--sidebar-w);
+      height:100vh;
+      background:linear-gradient(180deg,#0b1220,#0f1724 70%);
+      color:#fff;
+      padding:26px 18px;
+      display:flex;
+      flex-direction:column;
+    }
+    .brand{
+      font-weight:700;
+      font-size:20px;
+      letter-spacing:0.6px;
+      margin-bottom:4px;
+    }
+    .brand-sub{
+      font-size:12px;
+      opacity:.85;
+      color:rgba(255,255,255,.9);
+      margin-top:2px;
+    }
+
+    .nav{
+      margin-top:18px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+    }
+
+    .nav a{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border-radius:10px;
+      color:rgba(255,255,255,0.92);
+      text-decoration:none;
+      font-size:14px;
+    }
+    .nav a .ico{
+      width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.08);
+      display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;
+    }
+    .nav a.active{
+      background:rgba(255,255,255,0.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .sidebar-footer{
+      margin-top:12px;
+      border-top:1px solid rgba(255,255,255,0.05);
+      padding-top:12px;
+    }
+    .user-row{display:flex;gap:12px;align-items:center}
+    .avatar{
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#4fb0ff);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:white;
+      font-size:14px;
+    }
+    .user-info{font-size:13px}
+    .user-info .name{font-weight:600}
+    .user-info .role{color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px}
+
+    .logout{
+      margin-top:10px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      color:#fff;
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      cursor:pointer;
+      width:100%;
+    }
+
+    /* Main content */
+    .main{
+      flex:1;
+      padding:26px;
+      overflow:auto;
+    }
+
+    .top-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .welcome h1{margin:0;font-size:22px}
+    .welcome p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* Cards row */
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:10px;
+      margin-bottom:18px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      box-shadow:0 3px 10px rgba(15,23,36,0.03);
+      min-height:96px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .card .label{font-size:12px;color:var(--muted)}
+    .card .value{font-size:18px;font-weight:700;margin-top:6px}
+    .card .sub{font-size:12px;color:#9aa4b3;margin-top:8px}
+
+    /* charts row */
+    .charts{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .panel{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      box-shadow:0 3px 10px rgba(15,23,36,0.03);
+    }
+    .panel h3{margin:0;font-size:16px}
+    .panel p{margin:6px 0 12px;color:var(--muted);font-size:13px}
+
+    .chart-area{
+      width:100%;
+      height:260px;
+    }
+
+    /* additional info */
+    .extras{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:6px;
+    }
+    .extra{
+      background:var(--card);
+      padding:12px;border-radius:10px;border:1px solid var(--border);
+      color:var(--muted);
+    }
+    .extra h4{margin:0 0 6px 0;color:#253244;font-size:15px}
+    .extra p{margin:0;color:#5f6b78;font-size:13px}
+
+    /* responsive */
+    @media (max-width:1100px){
+      .cards{grid-template-columns:repeat(2,1fr)}
+      .charts{grid-template-columns:1fr}
+      .extras{grid-template-columns:1fr}
+      .sidebar{display:none}
+    }
+    @media (max-width:640px){
+      body{font-size:13px}
+    }
+
+    .chart-area {
+  width: 100%;
+  height: 260px;
+  max-height: 260px;
+  display: block;
+}
+
+    /* small helper */
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Dashboard app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" role="complementary" aria-label="Sidebar">
+      <div>
+        <div class="brand">DRAKA</div>
+        <div class="brand-sub">Thesis Management</div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html"><span class="ico">D</span><span>Dashboard</span></a>
+        <a href="myresearch.html"><span class="ico">R</span><span>My Research</span></a>
+        <a href="resources.html"><span class="ico">S</span><span>Resources</span></a>
+        <a class="active" href="meetings.html"><span class="ico">M</span><span>Meetings</span></a>
+        <a href="profile.html"><span class="ico">P</span><span>Profile</span></a>
+        <a href="settings.html"><span class="ico">⚙</span><span>Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="avatar" aria-hidden="true">OF</div>
+          <div class="user-info">
+            <div class="name">OFORI</div>
+            <div class="role">Graduate Student</div>
+          </div>
+        </div>
+        <button class="logout" aria-label="Log out">Log out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Meetings — DRAKA</title>
+
+  <!-- Chart.js CDN -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --sidebar-w: 260px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7b8896;
+      --accent:#2f6ee8;
+      --soft:#eef6ff;
+      --border:#e6ecf5;
+      --radius:12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:#0f1724;
+      display:flex;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+      font-size:14px;
+    }
+    .app { display:flex; width:100%; height:100vh; overflow:hidden; }
+
+    /* Sidebar */
+    .sidebar{
+      width:var(--sidebar-w);
+      min-width:var(--sidebar-w);
+      height:100vh;
+      background:linear-gradient(180deg,#0b1220,#0f1724 70%);
+      color:#fff;
+      padding:26px 18px;
+      display:flex;
+      flex-direction:column;
+    }
+    .brand{ font-weight:700; font-size:20px; letter-spacing:0.6px; margin-bottom:4px; }
+    .brand-sub{ font-size:12px; opacity:.85; color:rgba(255,255,255,.9); margin-top:2px; }
+    .nav{ margin-top:18px; display:flex; flex-direction:column; gap:8px; flex:1; }
+    .nav a{ display:flex; gap:12px; align-items:center; padding:10px; border-radius:10px; color:rgba(255,255,255,0.92); text-decoration:none; font-size:14px; }
+    .nav a .ico{ width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.08); display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px; }
+    .nav a.active{ background:rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); }
+    .sidebar-footer{ margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px; }
+    .user-row{display:flex;gap:12px;align-items:center}
+    .avatar{ width:44px;height:44px;border-radius:50%; background:linear-gradient(135deg,var(--accent),#4fb0ff); display:flex;align-items:center;justify-content:center; font-weight:700;color:white; font-size:14px; }
+    .user-info{font-size:13px}
+    .user-info .name{font-weight:600}
+    .user-info .role{color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px}
+    .logout{ margin-top:10px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:8px 10px; border-radius:8px; font-size:13px; cursor:pointer; width:100%; }
+
+    /* Main content */
+    .main{ flex:1; padding:26px; overflow:auto; }
+    .header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+    .header h1{ margin:0; font-size:22px; font-weight:700; }
+    .schedule-btn{ padding:8px 18px; background:var(--accent); color:white; border:none; border-radius:8px; font-size:14px; cursor:pointer; }
+
+    /* Calendar & meetings */
+    .content-grid{ display:grid; grid-template-columns:1.2fr 1fr; gap:24px; align-items:start; }
+    .calendar-section, .meetings-section{
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      padding:22px;
+    }
+    .calendar-title{ margin:0 0 14px 0; font-size:18px; font-weight:600; }
+    .calendar-container{ display:flex; flex-direction:column; gap:10px; }
+    .calendar-table{ width:100%; border-collapse:collapse; margin-bottom:10px; }
+    .calendar-table th, .calendar-table td{ width:calc(100%/7); text-align:center; font-size:15px; padding:10px 2px; }
+    .calendar-table th{ color:var(--muted); font-weight:500; }
+    .calendar-table td{ background:var(--soft); border-radius:7px; color:#313b53; font-weight:500; cursor:pointer; transition:background 0.14s; }
+    .calendar-table td.today{ background:var(--accent); color:#fff; font-weight:700; }
+    .calendar-table td.meeting{ background:#ffd0b6; color:#aa4a00; font-weight:600; }
+    .calendar-table td.upcoming{ background:#dbeafe; color:#2563eb; font-weight:600; border:2px solid var(--accent); }
+
+    .meetings-header{ font-size:19px; font-weight:700; margin-bottom:18px; }
+    .meeting-card{ border-radius:10px; background:#f6faff; border:1px solid #d4e5fb; padding:18px; margin-bottom:18px; display:flex; flex-direction:column; gap:6px; position:relative; }
+    .meeting-status{ display:inline-block; background:#fee2e2; color:#f43f5e; border-radius:7px; font-size:13px; font-weight:500; padding:4px 12px; margin-bottom:8px; }
+    .meeting-status.approved{ background:#dbeafe; color:#2563eb; }
+    .meeting-title{ font-size:16px; font-weight:600; color:#253241; }
+    .meeting-type{ display:inline-block; background:#ede9fe; color:#7c3aed; border-radius:8px; font-size:13px; font-weight:500; padding:4px 10px; margin-bottom:6px; }
+    .meeting-date{ font-size:15px; font-weight:600; color:#2f6ee8; }
+    .meeting-time{ font-size:14px; font-weight:500; color:#334155; }
+    .meeting-location{ font-size:14px; color:#475569; }
+
+    /* Modal */
+    .modal{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:1000; }
+    .modal-content{ background:var(--card); padding:20px; border-radius:var(--radius); width:370px; display:grid; gap:10px; box-shadow:0 3px 16px rgba(0,0,0,0.12);}
+    .modal-content h2{ margin:0; font-size:18px; }
+    .modal-content input, .modal-content select{ padding:8px; font-size:14px; border:1px solid var(--border); border-radius:8px; }
+    .modal-content button{ padding:10px; background:var(--accent); color:white; border:none; border-radius:8px; font-size:15px; font-weight:500; cursor:pointer; }
+
+    /* Responsive */
+    @media (max-width:1100px){ .content-grid{ grid-template-columns:1fr; } }
+  </style>
+
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar 
+    <aside class="sidebar">
+      <div>
+        <div class="brand">DRAKA</div>
+        <div class="brand-sub">Thesis Management</div>
+      </div>
+      <nav class="nav">
+        <a class="btn" href="index1.html"><span class="ico">🏠</span>Dashboard</a>
+        <a class="btn active" href="#"><span class="ico">📖</span>My Research</a>
+        <a class="btn" href="#"><span class="ico">📚</span>Resources</a>
+        <a class="btn" href="#"><span class="ico">📅</span>Meetings</a>
+        <a class="btn" href="#"><span class="ico">🙍</span>Profile</a>
+        <a class="btn" href="#"><span class="ico">⚙️</span>Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="avatar">OF</div>
+          <div class="user-info">
+            <div class="name">OFORI</div>
+            <div class="role">Graduate Student</div>
+          </div>
+        </div>
+        <button class="logout">Log out</button>
+      </div>
+    </aside>
+  -->
+```
+<!-- Main -->
+<main class="main">
+  <div class="header">
+    <h1>Meetings</h1>
+    <button class="schedule-btn" onclick="openModal()">+ Schedule Meeting</button>
+  </div>
+
+  <div class="content-grid">
+    <!-- Calendar Section -->
+    <section class="calendar-section">
+      <div class="calendar-title">November 2025</div>
+      <div class="calendar-container">
+        <table class="calendar-table">
+          <thead>
+            <tr>
+              <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+              <th>Thu</th><th>Fri</th><th>Sat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td><td></td><td></td><td></td><td></td>
+              <td>1</td><td>2</td>
+            </tr>
+            <tr>
+              <td>3</td><td>4</td><td>5</td>
+              <td>6</td><td>7</td><td>8</td><td>9</td>
+            </tr>
+            <tr>
+              <td>10</td><td class="meeting">11</td><td>12</td>
+              <td>13</td><td>14</td><td>15</td><td>16</td>
+            </tr>
+            <tr>
+              <td>17</td><td class="meeting">18</td><td>19</td>
+              <td class="upcoming today">20</td><td>21</td><td>22</td><td>23</td>
+            </tr>
+            <tr>
+              <td>24</td><td>25</td><td>26</td><td class="upcoming">27</td><td>28</td><td class="meeting">29</td><td>30</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="color:var(--muted);font-size:14px;margin-top:7px;">
+          <span>2 Upcoming Meetings</span> &bull; <span>2 Completed this month</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meetings Section -->
+    <section class="meetings-section">
+      <div class="meetings-header">Upcoming Meetings</div>
+      <div class="meeting-card">
+        <span class="meeting-status">Pending Approval</span>
+        <div class="meeting-title">Test Meeting</div>
+        <span class="meeting-type">Physical</span>
+        <div class="meeting-date">Wednesday, November 26, 2025</div>
+        <div class="meeting-time"><strong>Time:</strong> 10:10 <span>(45 minutes)</span></div>
+        <div class="meeting-location"><strong>Location:</strong> Not specified</div>
+      </div>
+      <div class="meeting-card">
+        <span class="meeting-status approved">Approved</span>
+        <div class="meeting-title">Chapter Review</div>
+        <span class="meeting-type">Virtual</span>
+        <div class="meeting-date">Monday, November 18, 2025</div>
+        <div class="meeting-time"><strong>Time:</strong> 09:00 <span>(30 minutes)</span></div>
+        <div class="meeting-location"><strong>Location:</strong> Zoom</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="meetingModal">
+    <div class="modal-content">
+      <h2>Schedule a Meeting</h2>
+      <input type="text" id="meetingTitle" placeholder="Meeting Title" />
+      <input type="date" id="meetingDate" />
+      <select id="meetingTime">
+        <option value="">Select Time</option>
+        <option>09:00</option>
+        <option>10:00</option>
+        <option>10:10</option>
+        <option>11:00</option>
+        <option>14:00</option>
+        <option>15:00</option>
+      </select>
+      <select id="meetingDuration">
+        <option value="">Select Duration</option>
+        <option>30 minutes</option>
+        <option>45 minutes</option>
+        <option>60 minutes</option>
+        <option>90 minutes</option>
+      </select>
+      <input type="text" id="meetingLocation" placeholder="Location (e.g., Zoom, Office)" />
+      <button onclick="submitMeeting()">Submit</button>
+    </div>
+  </div>
+</main>
+```
+
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('meetingModal').style.display = 'flex';
+    }
+    function submitMeeting() {
+      const title = document.getElementById('meetingTitle').value;
+      const date = document.getElementById('meetingDate').value;
+      const time = document.getElementById('meetingTime').value;
+      const duration = document.getElementById('meetingDuration').value;
+      const location = document.getElementById('meetingLocation').value;
+
+      if (title && date && time && duration && location) {
+        alert(`Meeting scheduled:
+${title}
+${date} at ${time} for ${duration}
+Location: ${location}`);
+        document.getElementById('meetingModal').style.display = 'none';
+      } else {
+        alert('Please fill in all fields.');
+      }
+    }
+    window.onclick = function(event) {
+      const modal = document.getElementById('meetingModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+  </script>
+
+</body>
+</html>
+
+  </div>
+
+  <script>
+    // Area chart (line filled) - user participation sample
+    (function(){
+      const ctx = document.getElementById('areaChart').getContext('2d');
+      const gradient = ctx.createLinearGradient(0,0,0,300);
+      gradient.addColorStop(0, 'rgba(47,110,232,0.18)');
+      gradient.addColorStop(1, 'rgba(47,110,232,0.02)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'],
+          datasets: [{
+            label: 'Submissions',
+            data: [2,1,1,1,2,2,5,18],
+            fill: true,
+            backgroundColor: gradient,
+            borderColor: '#2f6ee8',
+            tension: 0.35,
+            pointRadius: 3,
+            pointBackgroundColor: '#2f6ee8',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins:{
+            legend:{display:false},
+            tooltip:{mode:'index',intersect:false}
+          },
+          scales:{
+            x:{ grid:{display:false}, ticks:{color:'#667085'} },
+            y:{
+              ticks:{color:'#667085', precision:0},
+              grid:{color:'#eef3ff'}
+            }
+          }
+        }
+      });
+    })();
+
+    // Donut chart - chapters progress sample
+    (function(){
+      const ctx2 = document.getElementById('donutChart').getContext('2d');
+      new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Submitted','Remaining'],
+          datasets: [{
+            data: [2,6],
+            backgroundColor: ['#2f6ee8','#e6eefc'],
+            hoverBackgroundColor: ['#2f6ee8','#e6eefc'],
+            borderWidth:0
+          }]
+        },
+        options:{
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{label: (ctx)=> ctx.label + ': ' + ctx.parsed}}
+          }
+        }
+      });
+
+      // add center text for percent
+      // Chart.js v4 doesn't provide easy center text; this draws over the canvas.
+      const canvas = document.getElementById('donutChart');
+      const ctx = canvas.getContext('2d');
+      function drawCenter() {
+        const width = canvas.width;
+        const height = canvas.height;
+        // wait a tick to ensure chart is drawn
+        setTimeout(()=>{
+          ctx.save();
+          ctx.font = '600 18px Inter, Arial';
+          ctx.fillStyle = '#0f1724';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('25%', width/2, height/2);
+          ctx.restore();
+        }, 120);
+      }
+      drawCenter();
+    })();
+
+    // weekly chart script NEW
+        // Area chart JS (unchanged)
+    (function(){
+      // ...existing code...
+    })();
+
+    // Donut chart JS (unchanged)
+    (function(){
+      // ...existing code...
+    })();
+
+    // New: Weekly Submissions Bar Chart
+    (function(){
+      const ctx = document.getElementById('weeklyBarChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+          datasets: [{
+            label: 'Submissions',
+            data: [2, 3, 1, 4, 2, 5],
+            backgroundColor: '#2f6ee8'
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins:{
+            legend: {display:false},
+            tooltip: {mode:'index', intersect:false}
+          },
+          scales:{
+            x:{ grid:{display:false}, ticks:{color:'#667085'} },
+            y:{
+              ticks:{color:'#667085', precision:0},
+              grid:{color:'#eef3ff'}
+            }
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

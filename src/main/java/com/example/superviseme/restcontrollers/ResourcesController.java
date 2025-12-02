@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
         description = "The endpoints herein are for the CRUD of fees that would be used for resource management"
 )
 @RestController
+@CrossOrigin(origins = "*")
+
 public class ResourcesController {
 
     private final FileStorageService fileService;

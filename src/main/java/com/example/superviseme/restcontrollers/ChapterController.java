@@ -11,6 +11,7 @@ import com.example.superviseme.service.ChapterService;
 
 @RestController
 @RequestMapping(name="Chapter Controller", value = "/chapter")
+@CrossOrigin(origins = "*")
 public class ChapterController {
 	
 	private final ChapterService chapterService;

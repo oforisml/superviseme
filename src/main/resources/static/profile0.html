@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile — DRAKA</title>
+
+  <style>
+    :root{
+      --sidebar-w: 260px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7b8896;
+      --accent:#2f6ee8;
+      --soft:#eef6ff;
+      --border:#e6ecf5;
+      --radius:12px;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:#0f1724;
+      display:flex;
+    }
+
+    .main{flex:1;padding:26px}
+
+    .profile-form{
+      background:white;
+      border-radius:var(--radius);
+      padding:20px;
+      border:1px solid var(--border);
+      display:grid;
+      gap:16px;
+    }
+
+    .two-column{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:50px;
+    }
+
+    .profile-form label{
+      font-weight:600;
+      font-size:14px;
+      margin-bottom:6px;
+      display:block;
+    }
+
+    .profile-form input,
+    .profile-form textarea,
+    .styled-select{
+      width:100%;
+      padding:10px;
+      font-size:14px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#f9fafb;
+    }
+
+    textarea{min-height:80px}
+
+    .save-btn{
+      padding:10px 16px;
+      background:var(--accent);
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="main">
+
+  <form class="profile-form" id="profileForm">
+
+    <!-- FIRST ROW: Student ID + Email -->
+    <div class="two-column">
+      <div>
+        <label>Student ID</label>
+        <input type="text" id="studentIdInput" placeholder="Enter student ID" />
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input type="email" id="emailInput" placeholder="Enter email" />
+      </div>
+    </div>
+
+    <!-- SECOND ROW: Phone Number + Program Type -->
+    <div class="two-column">
+      <div>
+        <label>Phone Number</label>
+        <input type="text" id="phoneInput" placeholder="Enter phone number" />
+      </div>
+
+      <div>
+        <label>Program Type</label>
+        <select class="styled-select" id="programTypeSelect">
+          <option value="undergraduate">Undergraduate</option>
+          <option value="graduate">Graduate</option>
+          <option value="postgraduate">Postgraduate</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- REMAINING FIELDS BELOW, SINGLE COLUMN -->
+    <div>
+      <label>Full Name</label>
+      <input type="text" id="fullNameInput" />
+    </div>
+
+    <div style="display: none">
+      <label>User ID</label>
+      <input type="text" id="userIdField" />
+    </div>
+
+    <div>
+      <label>Department</label>
+      <select class="styled-select" id="departmentSelect">
+        <option value="computer-science">Computer Science</option>
+        <option value="mathematics">Mathematics</option>
+        <option value="biology">Biology</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Research Interests</label>
+      <input type="text" id="interestInput" />
+    </div>
+
+    <div>
+      <label>Research Thesis Title</label>
+      <input type="text" id="thesisInput" />
+    </div>
+
+    <div>
+      <label>Research Abstract</label>
+      <textarea id="abstractInput"></textarea>
+    </div>
+
+    <div>
+      <label>Research Objectives</label>
+      <textarea id="objectiveInput"></textarea>
+    </div>
+
+    <div>
+      <label>Justification of Engagement</label>
+      <textarea id="justificationInput"></textarea>
+    </div>
+
+    <button class="save-btn" type="button" onclick="saveProfile()">Save</button>
+  </form>
+
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
+  const studentId = params.get('studentId');
+
+  document.getElementById('userIdField').value = userId || '';
+  document.getElementById('studentIdInput').value = studentId || '';
+
+
+
+  async function saveProfile(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("userId");
+    console.log(userId)
+
+    const requestBody = {
+      id: userId,
+      email: document.getElementById("emailInput").value,
+      pin: null,
+      studentId: document.getElementById("studentIdInput").value,
+      phoneNumber: document.getElementById("phoneInput").value,
+      isActive: true,
+      fullName: document.getElementById("fullNameInput").value,
+      thesisTitle: document.getElementById("thesisInput").value,
+      abstractText: document.getElementById("abstractInput").value,
+      programType: document.getElementById("programTypeSelect").value,
+      researchArea: document.getElementById("interestInput").value,
+      researchObjective: document.getElementById("objectiveInput").value,
+      lectureAlignment: document.getElementById("justificationInput").value,
+      role: "STUDENT"
+    };
+
+    try{
+      const res = await fetch(`/users/`,{
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(requestBody)
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert("Error: " + (error.message || "Unable to create profile"));
+        return;
+      }else{
+        alert("Profile updated successfully!");
+      }
+    }catch(e){
+      alert("Network error");
+    }
+  }
+</script>
+
+</body>
+</html>

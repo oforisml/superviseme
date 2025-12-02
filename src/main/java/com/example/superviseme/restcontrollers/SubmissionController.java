@@ -14,6 +14,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/submissions")
+@CrossOrigin(origins = "*")
+
 public class SubmissionController {
     private final SubmissionService service;
 

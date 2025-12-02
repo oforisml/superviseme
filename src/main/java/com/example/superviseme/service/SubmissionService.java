@@ -14,10 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -39,13 +37,10 @@ public class SubmissionService {
         // Fetch student Chapter
         StudentChapter studentChapter = studentChapterService.findById(record.studentChapterId());
 
-
         Submission submission = new Submission();
         submission.setSummary(record.summary());
         submission.setStudentChapter(studentChapter);
         submission.setStatus(SubmissionStatus.PENDING);
-
-
 
         // Persisting the file
         Document document = fileStorageService.saveFile(record.file());
@@ -70,26 +65,23 @@ public class SubmissionService {
             submission.setStatus(record.status());
             if(record.status().equals(SubmissionStatus.ACCEPTED)){
                 studentChapterService.advanceStudentChapter(submission.getStudentChapter());
+                submission = repository.save(submission);
             }
-
         }
 
-        submission = repository.save(submission);
+
 
         if(record.comment() != null){
             Comment comment = new Comment();
             comment.setComment(record.comment());
+            comment.setSubmission(submission);
             comment = commentService.persistComment(comment);
-
-            submission.getComments().add(comment);
-
-            submission = repository.save(submission);
-
             System.out.println(comment.getComment());
         }
 
-
-        return ResponseEntity.ok(submission);
+        // if submission does not exists, this code would not be reached hence the
+        // global error handler would take care of it
+        return ResponseEntity.ok(repository.findById(id).get());
 
     }
 

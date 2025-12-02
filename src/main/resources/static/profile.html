@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — DRAKA</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --sidebar-w: 260px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7b8896;
+      --accent:#2f6ee8;
+      --soft:#eef6ff;
+      --border:#e6ecf5;
+      --radius:12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:#0f1724;
+      display:flex;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+      font-size:14px;
+    }
+
+    /* Layout */
+    .app {
+      display:flex;
+      width:100%;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width:var(--sidebar-w);
+      min-width:var(--sidebar-w);
+      height:100vh;
+      background:linear-gradient(180deg,#0b1220,#0f1724 70%);
+      color:#fff;
+      padding:26px 18px;
+      display:flex;
+      flex-direction:column;
+    }
+    .brand{
+      font-weight:700;
+      font-size:20px;
+      letter-spacing:0.6px;
+      margin-bottom:4px;
+    }
+    .brand-sub{
+      font-size:12px;
+      opacity:.85;
+      color:rgba(255,255,255,.9);
+      margin-top:2px;
+    }
+
+    .nav{
+      margin-top:18px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+    }
+
+    .nav a{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border-radius:10px;
+      color:rgba(255,255,255,0.92);
+      text-decoration:none;
+      font-size:14px;
+    }
+    .nav a .ico{
+      width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.08);
+      display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;
+    }
+    .nav a.active{
+      background:rgba(255,255,255,0.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .sidebar-footer{
+      margin-top:12px;
+      border-top:1px solid rgba(255,255,255,0.05);
+      padding-top:12px;
+    }
+    .user-row{display:flex;gap:12px;align-items:center}
+    .avatar{
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#4fb0ff);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:white;
+      font-size:14px;
+    }
+    .user-info{font-size:13px}
+    .user-info .name{font-weight:600}
+    .user-info .role{color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px}
+
+    .logout{
+      margin-top:10px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      color:#fff;
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      cursor:pointer;
+      width:100%;
+    }
+
+    /* Main content */
+    .main{
+      flex:1;
+      padding:26px;
+      overflow:auto;
+    }
+
+    .top-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .welcome h1{margin:0;font-size:22px}
+    .welcome p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* Cards row */
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:10px;
+      margin-bottom:18px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      box-shadow:0 3px 10px rgba(15,23,36,0.03);
+      min-height:96px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .card .label{font-size:12px;color:var(--muted)}
+    .card .value{font-size:18px;font-weight:700;margin-top:6px}
+    .card .sub{font-size:12px;color:#9aa4b3;margin-top:8px}
+
+    /* charts row */
+    .charts{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .panel{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      box-shadow:0 3px 10px rgba(15,23,36,0.03);
+    }
+    .panel h3{margin:0;font-size:16px}
+    .panel p{margin:6px 0 12px;color:var(--muted);font-size:13px}
+
+    .chart-area{
+      width:100%;
+      height:260px;
+    }
+
+    /* additional info */
+    .extras{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:6px;
+    }
+    .extra{
+      background:var(--card);
+      padding:12px;border-radius:10px;border:1px solid var(--border);
+      color:var(--muted);
+    }
+    .extra h4{margin:0 0 6px 0;color:#253244;font-size:15px}
+    .extra p{margin:0;color:#5f6b78;font-size:13px}
+
+    /* responsive */
+    @media (max-width:1100px){
+      .cards{grid-template-columns:repeat(2,1fr)}
+      .charts{grid-template-columns:1fr}
+      .extras{grid-template-columns:1fr}
+      .sidebar{display:none}
+    }
+    @media (max-width:640px){
+      body{font-size:13px}
+    }
+
+    .chart-area {
+  width: 100%;
+  height: 260px;
+  max-height: 260px;
+  display: block;
+}
+
+    /* small helper */
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Dashboard app">
+    <!-- SIDEBAR -->
+    <!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile — DRAKA</title>
+
+  <!-- Chart.js CDN -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --sidebar-w: 260px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7b8896;
+      --accent:#2f6ee8;
+      --soft:#eef6ff;
+      --border:#e6ecf5;
+      --radius:12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:#0f1724;
+      display:flex;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+      font-size:14px;
+    }
+
+    .app{display:flex;width:100%;height:100vh;overflow:hidden}
+
+    /* Sidebar */
+    .sidebar{
+      width:var(--sidebar-w);
+      min-width:var(--sidebar-w);
+      height:100vh;
+      background:linear-gradient(180deg,#0b1220,#0f1724 70%);
+      color:#fff;
+      padding:26px 18px;
+      display:flex;
+      flex-direction:column;
+    }
+    .brand{font-weight:700;font-size:20px;margin-bottom:4px}
+    .brand-sub{font-size:12px;opacity:.85;color:rgba(255,255,255,.9);margin-top:2px}
+    .nav{margin-top:18px;display:flex;flex-direction:column;gap:8px;flex:1}
+    .nav a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;color:rgba(255,255,255,0.92);text-decoration:none;font-size:14px}
+    .nav a .ico{width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.08);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+    .nav a.active{background:rgba(255,255,255,0.06);box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02)}
+    .sidebar-footer{margin-top:12px;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px}
+    .user-row{display:flex;gap:12px;align-items:center}
+    .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#4fb0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:14px}
+    .user-info{font-size:13px}
+    .user-info .name{font-weight:600}
+    .user-info .role{color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px}
+    .logout{margin-top:10px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 10px;border-radius:8px;font-size:13px;cursor:pointer;width:100%}
+
+    /* Main content */
+    .main{flex:1;padding:26px;overflow:auto}
+
+    .header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .header h1{margin:0;font-size:22px}
+    .edit-btn{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+
+    .profile-form{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);display:grid;gap:16px}
+    .profile-form label{font-weight:600;font-size:14px;margin-bottom:4px;display:block}
+    .profile-form input,
+    .profile-form textarea{width:100%;padding:10px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:#f9fafb}
+    .profile-form textarea{resize:vertical;min-height:80px}
+    .save-btn{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-top:10px;display:none}
+
+    @media (max-width:1100px){.sidebar{display:none}}
+    @media (max-width:640px){body{font-size:13px}}
+  </style>
+
+</head>
+<body>
+  <div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div>
+    <div class="brand">DRAKA</div>
+    <div class="brand-sub">Thesis Management</div>
+  </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html"><span class="ico">D</span><span>Dashboard</span></a>
+        <a href="myresearch.html"><span class="ico">R</span><span>My Research</span></a>
+        <a href="resources.html"><span class="ico">S</span><span>Resources</span></a>
+        <a href="meetings.html"><span class="ico">M</span><span>Meetings</span></a>
+        <a class="active" href="profile.html"><span class="ico">P</span><span>Profile</span></a>
+        <a href="settings.html"><span class="ico">⚙</span><span>Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="avatar" aria-hidden="true">OF</div>
+          <div class="user-info">
+            <div class="name">OFORI</div>
+            <div class="role">Graduate Student</div>
+          </div>
+        </div>
+        <button class="logout" aria-label="Log out">Log out</button>
+      </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="header">
+    <h1>My Profile</h1>
+    <div style="display:flex;gap:10px">
+      <button class="edit-btn" onclick="toggleEdit()">Edit</button>
+      <button class="edit-btn" onclick="location.href='index.html'">Back to Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Profile Form -->
+  <form class="profile-form" id="profileForm">
+    <div><label>Full Name</label><input type="text" value="OPORL SAMUEL" readonly /></div>
+    <div><label>Email</label><input type="email" value="oporl@sample.edu" readonly /></div>
+    <div><label>User ID</label><input type="text" value="oporl" readonly /></div>
+    <div><label>Department</label><input type="text" value="Computer Science" readonly /></div>
+    <div><label>Advisor</label><input type="text" value="Dr. Smith" readonly /></div>
+    <div><label>Research Interests</label><input type="text" value="Machine Learning, Data Mining" readonly /></div>
+    <div><label>Research Thesis Title</label><input type="text" value="Deep Learning Approaches for Big Data Analysis" readonly /></div>
+    <div><label>Research Abstract</label><textarea readonly>This research focuses on deep learning techniques for big data analysis...</textarea></div>
+    <div><label>Research Objectives</label><textarea readonly>1. To develop deep learning models...</textarea></div>
+    <div><label>Justification of Engagement</label><textarea readonly>Deep learning offers promising solutions for complex data structures...</textarea></div>
+    <button class="save-btn" type="button" onclick="saveProfile()">Save</button>
+  </form>
+</main>
+
+  </div>
+
+  <script>
+    function toggleEdit(){
+      const form=document.getElementById('profileForm');
+      const inputs=form.querySelectorAll('input,textarea');
+      const saveBtn=form.querySelector('.save-btn');
+      const isEditable=inputs[0].readOnly;
+      inputs.forEach(el=>el.readOnly=!isEditable);
+      saveBtn.style.display=isEditable?'inline-block':'none';
+    }
+
+    function saveProfile(){
+      alert('Profile saved successfully!');
+      toggleEdit();
+    }
+  </script>
+
+
+
+</main>
+  </div>
+
+  <script>
+    // Area chart (line filled) - user participation sample
+    (function(){
+      const ctx = document.getElementById('areaChart').getContext('2d');
+      const gradient = ctx.createLinearGradient(0,0,0,300);
+      gradient.addColorStop(0, 'rgba(47,110,232,0.18)');
+      gradient.addColorStop(1, 'rgba(47,110,232,0.02)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'],
+          datasets: [{
+            label: 'Submissions',
+            data: [2,1,1,1,2,2,5,18],
+            fill: true,
+            backgroundColor: gradient,
+            borderColor: '#2f6ee8',
+            tension: 0.35,
+            pointRadius: 3,
+            pointBackgroundColor: '#2f6ee8',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins:{
+            legend:{display:false},
+            tooltip:{mode:'index',intersect:false}
+          },
+          scales:{
+            x:{ grid:{display:false}, ticks:{color:'#667085'} },
+            y:{
+              ticks:{color:'#667085', precision:0},
+              grid:{color:'#eef3ff'}
+            }
+          }
+        }
+      });
+    })();
+
+    // Donut chart - chapters progress sample
+    (function(){
+      const ctx2 = document.getElementById('donutChart').getContext('2d');
+      new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Submitted','Remaining'],
+          datasets: [{
+            data: [2,6],
+            backgroundColor: ['#2f6ee8','#e6eefc'],
+            hoverBackgroundColor: ['#2f6ee8','#e6eefc'],
+            borderWidth:0
+          }]
+        },
+        options:{
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{label: (ctx)=> ctx.label + ': ' + ctx.parsed}}
+          }
+        }
+      });
+
+      // add center text for percent
+      // Chart.js v4 doesn't provide easy center text; this draws over the canvas.
+      const canvas = document.getElementById('donutChart');
+      const ctx = canvas.getContext('2d');
+      function drawCenter() {
+        const width = canvas.width;
+        const height = canvas.height;
+        // wait a tick to ensure chart is drawn
+        setTimeout(()=>{
+          ctx.save();
+          ctx.font = '600 18px Inter, Arial';
+          ctx.fillStyle = '#0f1724';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('25%', width/2, height/2);
+          ctx.restore();
+        }, 120);
+      }
+      drawCenter();
+    })();
+
+    // weekly chart script NEW
+        // Area chart JS (unchanged)
+    (function(){
+      // ...existing code...
+    })();
+
+    // Donut chart JS (unchanged)
+    (function(){
+      // ...existing code...
+    })();
+
+    // New: Weekly Submissions Bar Chart
+    (function(){
+      const ctx = document.getElementById('weeklyBarChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+          datasets: [{
+            label: 'Submissions',
+            data: [2, 3, 1, 4, 2, 5],
+            backgroundColor: '#2f6ee8'
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins:{
+            legend: {display:false},
+            tooltip: {mode:'index', intersect:false}
+          },
+          scales:{
+            x:{ grid:{display:false}, ticks:{color:'#667085'} },
+            y:{
+              ticks:{color:'#667085', precision:0},
+              grid:{color:'#eef3ff'}
+            }
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

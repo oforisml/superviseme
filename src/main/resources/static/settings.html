@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DRAKA — Settings</title>
+ 
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --sidebar-w: 260px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7b8896;
+      --accent:#2f6ee8;
+      --soft:#eef6ff;
+      --border:#e6ecf5;
+      --radius:12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:#0f1724;
+      display:flex;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+      font-size:14px;
+    }
+
+    /* Layout */
+    .app { display:flex; width:100%; height:100vh; overflow:hidden; }
+
+    /* Sidebar */
+    .sidebar{
+      width:var(--sidebar-w);
+      min-width:var(--sidebar-w);
+      height:100vh;
+      background:linear-gradient(180deg,#0b1220,#0f1724 70%);
+      color:#fff;
+      padding:26px 18px;
+      display:flex;
+      flex-direction:column;
+    }
+    .brand{ font-weight:700; font-size:20px; margin-bottom:4px; }
+    .brand-sub{ font-size:12px; opacity:.85; color:rgba(255,255,255,.9); margin-top:2px; }
+
+    .nav{
+      margin-top:18px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+    }
+    .nav a{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border-radius:10px;
+      color:rgba(255,255,255,0.92);
+      text-decoration:none;
+      font-size:14px;
+    }
+    .nav a .ico{
+      width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.08);
+      display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;
+    }
+    .nav a.active{
+      background:rgba(255,255,255,0.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .sidebar-footer{
+      margin-top:12px;
+      border-top:1px solid rgba(255,255,255,0.05);
+      padding-top:12px;
+    }
+    .user-row{display:flex;gap:12px;align-items:center}
+    .avatar{
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#4fb0ff);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:white;
+      font-size:14px;
+    }
+    .user-info{font-size:13px}
+    .user-info .name{font-weight:600}
+    .user-info .role{color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px}
+
+    .logout{
+      margin-top:10px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      color:#fff;
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      cursor:pointer;
+      width:100%;
+    }
+
+    /* Main content */
+    .main{
+      flex:1;
+      padding:26px;
+      overflow:auto;
+    }
+
+    .main h1{margin:0;font-size:22px;margin-bottom:20px;}
+
+    /* Settings sections */
+    .section{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      margin-bottom:18px;
+    }
+    .section h2{margin:0 0 12px 0;font-size:16px}
+    .toggle-row{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+    }
+    .toggle-row label{font-size:14px;color:var(--muted);}
+    .toggle{
+      width:40px;height:20px;background:#ccc;border-radius:10px;position:relative;cursor:pointer;
+    }
+    .toggle::before{
+      content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;background:white;border-radius:50%;transition:0.2s;
+    }
+    .toggle.active{background:var(--accent);}
+    .toggle.active::before{left:22px;}
+    .save-btn{
+      margin-top:10px;padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;
+    }
+    .input-row{display:grid;gap:10px;margin-top:10px;}
+    .input-row input{padding:10px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:#f9fafb;}
+    .note{font-size:12px;color:var(--muted);margin-top:-6px;}
+    .privacy-note{font-size:13px;color:var(--muted);margin-top:6px;}
+
+    /* Back button */
+    .back-btn{
+      padding:6px 12px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:var(--card);
+      cursor:pointer;
+      font-size:14px;
+      margin-bottom:16px;
+    }
+
+    @media (max-width:1100px){
+      .sidebar{display:none;}
+    }
+  </style>
+
+</head>
+<body>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="brand">DRAKA</div>
+        <div class="brand-sub">Thesis Management</div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html"><span class="ico">D</span><span>Dashboard</span></a>
+        <a href="myresearch.html"><span class="ico">R</span><span>My Research</span></a>
+        <a href="resources.html"><span class="ico">S</span><span>Resources</span></a>
+        <a href="meetings.html"><span class="ico">M</span><span>Meetings</span></a>
+        <a href="profile.html"><span class="ico">P</span><span>Profile</span></a>
+        <a class="active" href="settings.html"><span class="ico">⚙</span><span>Settings</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="avatar" aria-hidden="true">OF</div>
+          <div class="user-info">
+            <div class="name">OFORI</div>
+            <div class="role">Graduate Student</div>
+          </div>
+        </div>
+        <button class="logout">Log out</button>
+      </div>
+    </aside>
+
+<!-- Main content -->
+<main class="main">
+  <button class="back-btn" onclick="window.location.href='index.html'">← Back to Dashboard</button>
+  <h1>Settings</h1>
+
+  <!-- Notifications -->
+  <div class="section">
+    <h2>Notifications</h2>
+    <div class="toggle-row">
+      <label>Email Notifications</label>
+      <div class="toggle active" onclick="toggleSwitch(this)"></div>
+    </div>
+    <div class="toggle-row">
+      <label>Meeting Reminders</label>
+      <div class="toggle active" onclick="toggleSwitch(this)"></div>
+    </div>
+    <div class="toggle-row">
+      <label>Feedback Notifications</label>
+      <div class="toggle" onclick="toggleSwitch(this)"></div>
+    </div>
+    <div class="toggle-row">
+      <label>Mentorship Notifications</label>
+      <div class="toggle active" onclick="toggleSwitch(this)"></div>
+    </div>
+    <div class="toggle-row">
+      <label>Weekly Summary</label>
+      <div class="toggle" onclick="toggleSwitch(this)"></div>
+    </div>
+    <button class="save-btn">Save Preferences</button>
+  </div>
+
+  <!-- Security -->
+  <div class="section">
+    <h2>Security</h2>
+    <div class="input-row">
+      <input type="password" placeholder="Current Password" />
+      <input type="password" placeholder="New Password" />
+      <div class="note">Enter the new password (min. 8 characters)</div>
+      <input type="password" placeholder="Confirm New Password" />
+    </div>
+    <button class="save-btn">Change Password</button>
+  </div>
+
+  <!-- Privacy -->
+  <div class="section">
+    <h2>Privacy</h2>
+    <div class="privacy-note">
+      <strong>Account Email:</strong> Your account email is managed by the university system and cannot be changed here.
+    </div>
+    <div class="privacy-note">
+      <strong>Profile Visibility:</strong> Your profile visibility can be managed by your university administrators.
+    </div>
+  </div>
+</main>
+
+
+
+  <script>
+    function toggleSwitch(el) {
+      el.classList.toggle('active');
+    }
+  </script>
+  </div>
+</body>
+</html>

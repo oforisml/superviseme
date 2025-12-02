@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Page</title>
+
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+    }
+
+    body{
+        height: 100vh;
+        display: flex;
+        overflow: hidden;
+    }
+
+    /* LEFT SIDE */
+    .left{
+        width: 55%;
+        padding: 60px 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .left h1{
+        font-size: 32px; /* reduced */
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .left p{
+        font-size: 13px; /* reduced */
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    label{
+        font-size: 13px;  /* reduced */
+        margin-bottom: 5px;
+        font-weight: 500;
+        display: block;
+    }
+
+    input{
+        width: 80%;
+        padding: 10px; /* reduced */
+        margin-bottom: 18px;
+        border: 1px solid #dcdcdc;
+        border-radius: 5px;
+        font-size: 13px; /* reduced */
+    }
+
+    input:focus{
+        border-color: #000;
+        outline: none;
+    }
+
+    button{
+        width: 80%;
+        padding: 11px; /* reduced */
+        background: #000;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px; /* reduced */
+        cursor: pointer;
+    }
+
+    /* RIGHT SIDE (IMAGE) */
+    .right{
+        width: 45%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f5f5;
+        padding-right: 1px;
+    }
+
+    .right img{
+        max-width: 100%;   /* scaled down */
+        max-height: 100%;  /* scaled down */
+        object-fit: contain;
+    }
+
+    @media(max-width: 900px){
+        body{
+            flex-direction: column;
+        }
+        .left, .right{
+            width: 100%;
+            padding: 0px;
+        }
+        .right img{
+            width: 100%;
+            height: auto;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+    <div class="left">
+        <h1>Welcome</h1>
+        <p>Log in to the Thesis & Dissertation Supervision System</p>
+
+        <label>Student ID</label>
+        <input type="text" placeholder="Enter your student ID">
+
+        <label>PIN</label>
+        <input type="password" placeholder="Enter your PIN">
+
+        <button>Sign In</button>
+    </div>
+
+    <div class="right">
+        <img src="assets/login.png" alt="Login Image">
+    </div>
+
+
+    <script>
+
+        document.querySelector("button").addEventListener("click", async function () {
+            const studentId = document.querySelector('input[type="text"]').value;
+            const pin = document.querySelector('input[type="password"]').value;
+
+            // Build request body
+            const body = {
+                studentId: studentId,
+                pin: pin
+            };
+
+            try {
+                const response = await fetch("/users/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                });
+
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert("Error: " + (error.message || "Unable to create account"));
+                    return;
+                }
+
+                const data = await response.json();
+
+                // ----------------------------------
+                //     🔥 PROFILE STATUS LOGIC
+                // ----------------------------------
+
+                // 1️⃣ Profile ACTIVATED → go to dashboard
+                if (data.isUserProfileActive === true) {
+                    window.location.href = "dashboard.html";
+                    return;
+                }
+
+                // 2️⃣ Profile CREATED but NOT ACTIVE → pending review
+                if (data.isUserProfileCreated === true && data.isUserProfileActive === false) {
+                    alert("Your profile is pending review. Please wait for approval.");
+                    return;
+                }
+
+                // 3️⃣ Profile NOT CREATED → go to profile creation page
+                if (data.isUserProfileCreated === false) {
+                    window.location.href = "profile0.html?userId=" + data.id+"&studentId="+data.studentId;
+                    return;
+                }
+
+            } catch (err) {
+                // No connection or server down
+                alert("Network error: " + err.message);
+            }
+        });
+    </script>
+</body>
+
+</html>

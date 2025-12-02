@@ -10,7 +10,8 @@ public record MeetingRecord(
 		String link,
 		String agenda,
 		int duration,
-		int meetingType
+		int meetingType,
+		String studentId
 		) {
 
 }
