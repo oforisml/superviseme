@@ -36,4 +36,9 @@ public class CommentService {
     public List<Comment> findAllBySubmissionId(UUID id) {
         return repository.findBySubmission_IdEquals(id);
     }
+    
+    public ResponseEntity<?> getRecentComments(UUID submissionId){
+    	List<Comment> comments = repository.findBySubmissionIdOrderByCreatedAtDesc(submissionId);
+    	return ResponseEntity.ok(comments);
+    }
 }

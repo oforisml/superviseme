@@ -258,11 +258,20 @@ public class StudentChapterService {
                 "GROUP BY m.month_year, m.month_number, m.month_name, m.month_index  " +
                 "ORDER BY m.month_index DESC;";
 
-        return template.query(meetingForThePastMonths, (rs,rc) -> new StatisticsRecord(
+        return template.query(meetingForThePastMonths, (rs, rc) -> new StatisticsRecord(
                 rs.getInt("month_year"),
                 rs.getInt("month_number"),
                 rs.getString("month_name"),
                 rs.getInt("meeting_count"))
-                );
+        );
+    }
+    public ResponseEntity<?> getCurrentStage(String studentId){
+    	List<StudentChapter> studentChapters = repository.findByStudentIdAndStatus(studentId,StudentChapterStatus.OPENED);
+    	return ResponseEntity.ok(studentChapters);    
+    }
+    
+    public ResponseEntity<?> getCompletedChapters(String studentId){
+    	List<StudentChapter> studentChapters = repository.findByStudentIdAndStatus(studentId,StudentChapterStatus.CLOSED);
+    	return ResponseEntity.ok(studentChapters);    
     }
 }

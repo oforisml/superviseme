@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity(name = "tbl_comment")
 @Table
@@ -22,5 +26,10 @@ public class Comment {
     @JsonBackReference
     @JoinColumn(name = "submission_id", referencedColumnName = "id")
     private Submission submission;
+    
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
 }

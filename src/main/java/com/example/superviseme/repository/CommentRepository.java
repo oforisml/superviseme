@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
     @Query("select t from tbl_comment t where t.submission.id = ?1")
     List<Comment> findBySubmission_IdEquals(UUID id);
+    
+    List<Comment> findBySubmissionIdOrderByCreatedAtDesc(UUID submissionId);
 }

@@ -2,6 +2,8 @@ package com.example.superviseme.repository;
 
 
 import com.example.superviseme.entities.Submission;
+import com.example.superviseme.enums.SubmissionStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,4 +22,11 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
             "GROUP BY WEEK(s.createdAt) " +
             "ORDER BY  WEEK(s.createdAt)")
     List<Object[]> findSubmissionsByWeekForStudent(String studentId, LocalDateTime startOfMonth, LocalDateTime endOfMonth);
+    
+    List<Submission> findByStudentChapterIdAndStatus(UUID studentChapterId, SubmissionStatus status);
+    
+    List<Submission> findByStudentChapterIdOrderByCreatedAtDesc(UUID studentChapterId);
+
+    
+    
 }
