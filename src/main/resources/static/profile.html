@@ -220,6 +220,32 @@
     /* small helper */
     .muted{color:var(--muted)}
   </style>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get("userId");
+      if (!userId) return;
+
+      // Wait for DOM to exist but run ASAP
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
+          const original = link.getAttribute("href");
+
+          // ignore empty or "#" links
+          if (!original || original === "#") return;
+
+          // preserve any existing query params
+          const url = new URL(original, window.location.origin);
+          url.searchParams.set("userId", userId);
+
+          // update real link
+          link.href = url.pathname + "?" + url.searchParams.toString();
+        });
+      });
+    })();
+  </script>
+
 </head>
 <body>
   <div class="app" role="application" aria-label="Dashboard app">
@@ -297,6 +323,11 @@
     .edit-btn{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
 
     .profile-form{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);display:grid;gap:16px}
+    .two-column{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:50px;
+    }
     .profile-form label{font-weight:600;font-size:14px;margin-bottom:4px;display:block}
     .profile-form input,
     .profile-form textarea{width:100%;padding:10px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:#f9fafb}
@@ -351,16 +382,82 @@
 
   <!-- Profile Form -->
   <form class="profile-form" id="profileForm">
-    <div><label>Full Name</label><input type="text" value="OPORL SAMUEL" readonly /></div>
-    <div><label>Email</label><input type="email" value="oporl@sample.edu" readonly /></div>
-    <div><label>User ID</label><input type="text" value="oporl" readonly /></div>
-    <div><label>Department</label><input type="text" value="Computer Science" readonly /></div>
-    <div><label>Advisor</label><input type="text" value="Dr. Smith" readonly /></div>
-    <div><label>Research Interests</label><input type="text" value="Machine Learning, Data Mining" readonly /></div>
-    <div><label>Research Thesis Title</label><input type="text" value="Deep Learning Approaches for Big Data Analysis" readonly /></div>
-    <div><label>Research Abstract</label><textarea readonly>This research focuses on deep learning techniques for big data analysis...</textarea></div>
-    <div><label>Research Objectives</label><textarea readonly>1. To develop deep learning models...</textarea></div>
-    <div><label>Justification of Engagement</label><textarea readonly>Deep learning offers promising solutions for complex data structures...</textarea></div>
+
+    <!-- FIRST ROW: Student ID + Email -->
+    <div class="two-column">
+      <div>
+        <label>Student ID</label>
+        <input type="text" readonly id="studentIdInput" placeholder="Enter student ID" />
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input type="email" id="emailInput" placeholder="Enter email" />
+      </div>
+    </div>
+
+    <!-- SECOND ROW: Phone Number + Program Type -->
+    <div class="two-column">
+      <div>
+        <label>Phone Number</label>
+        <input type="text" id="phoneInput" placeholder="Enter phone number" />
+      </div>
+
+      <div>
+        <label>Program Type</label>
+        <select class="styled-select" id="programTypeSelect">
+          <option value="undergraduate">Undergraduate</option>
+          <option value="graduate">Graduate</option>
+          <option value="postgraduate">Postgraduate</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- REMAINING FIELDS BELOW, SINGLE COLUMN -->
+    <div>
+      <label>Full Name</label>
+      <input type="text" id="fullNameInput" />
+    </div>
+
+    <div style="display: none">
+      <label>User ID</label>
+      <input type="text" id="userIdField" />
+    </div>
+
+    <div>
+      <label>Department</label>
+      <select class="styled-select" id="departmentSelect">
+        <option value="computer-science">Computer Science</option>
+        <option value="mathematics">Mathematics</option>
+        <option value="biology">Biology</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Research Interests</label>
+      <input type="text" id="interestInput" />
+    </div>
+
+    <div>
+      <label>Research Thesis Title</label>
+      <input type="text" id="thesisInput" />
+    </div>
+
+    <div>
+      <label>Research Abstract</label>
+      <textarea id="abstractInput"></textarea>
+    </div>
+
+    <div>
+      <label>Research Objectives</label>
+      <textarea id="objectiveInput"></textarea>
+    </div>
+
+    <div>
+      <label>Justification of Engagement</label>
+      <textarea id="justificationInput"></textarea>
+    </div>
     <button class="save-btn" type="button" onclick="saveProfile()">Save</button>
   </form>
 </main>
@@ -368,27 +465,164 @@
   </div>
 
   <script>
-    function toggleEdit(){
-      const form=document.getElementById('profileForm');
-      const inputs=form.querySelectorAll('input,textarea');
-      const saveBtn=form.querySelector('.save-btn');
-      const isEditable=inputs[0].readOnly;
-      inputs.forEach(el=>el.readOnly=!isEditable);
-      saveBtn.style.display=isEditable?'inline-block':'none';
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('userId');
+    document.getElementById('userIdField').value = userId || '';
+
+
+
+
+    // Fetch the user details and use it to prepopulate the table
+    async function getProfile() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("userId");
+
+      console.log("UserId: ", userId)
+      try {
+        const res = await fetch(`/users/` + userId, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (!res.ok) {
+          console.log(await res.json());
+          window.location.href = "login.html";
+          return;
+        }
+
+        const data = await res.json();
+        const profile = data.studentProfile || {};
+
+        // -------------------------------
+        //   🟦 PRE-POPULATE FORM FIELDS
+        // -------------------------------
+
+        // Top-level fields
+        document.getElementById("studentIdInput").value = data.studentId || "";
+        document.getElementById("emailInput").value = data.email || "";
+        document.getElementById("phoneInput").value = data.phoneNumber || "";
+
+        // Hidden userId
+        document.getElementById("userIdField").value = data.id || "";
+
+        // Student profile fields
+        document.getElementById("programTypeSelect").value = profile.programType || "";
+        document.getElementById("fullNameInput").value = profile.fullName || "";
+
+
+        // Interests (maps to researchArea)
+        document.getElementById("interestInput").value = profile.researchArea || "";
+
+        // Thesis Title
+        document.getElementById("thesisInput").value = profile.researchTopic || "";
+
+        // Abstract
+        document.getElementById("abstractInput").value = profile.abstractText || "";
+
+        // Objectives
+        document.getElementById("objectiveInput").value = profile.researchObjectives || "";
+
+        // Justification of Engagement (lectureAlignment)
+        document.getElementById("justificationInput").value = profile.lectureAlignment || "";
+
+      } catch (e) {
+        console.log("An error occurred: " + e);
+      }
     }
 
-    function saveProfile(){
-      alert('Profile saved successfully!');
-      toggleEdit();
+
+    function toggleEdit() {
+      const form = document.getElementById('profileForm');
+      const inputs = form.querySelectorAll('input, textarea');
+      const saveBtn = form.querySelector('.save-btn');
+      const isEditable = inputs[0].readOnly;
+
+      inputs.forEach(el => el.readOnly = !isEditable);
+      saveBtn.style.display = isEditable ? 'inline-block' : 'none';
     }
+
+
+      async function saveProfile(){
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("userId");
+        console.log(userId)
+
+        const requestBody = {
+          id: userId,
+          email: document.getElementById("emailInput").value,
+          studentId: document.getElementById("studentIdInput").value,
+          phoneNumber: document.getElementById("phoneInput").value,
+          fullName: document.getElementById("fullNameInput").value,
+          thesisTitle: document.getElementById("thesisInput").value,
+          abstractText: document.getElementById("abstractInput").value,
+          programType: document.getElementById("programTypeSelect").value,
+          researchArea: document.getElementById("interestInput").value,
+          researchObjective: document.getElementById("objectiveInput").value,
+          lectureAlignment: document.getElementById("justificationInput").value,
+          role: "STUDENT"
+        };
+
+        try{
+          const res = await fetch(`/users/`,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(requestBody)
+          });
+
+          if (!res.ok) {
+            const error = await res.json();
+            alert("Error: " + (error.message || "Unable to create profile"));
+            return;
+          }
+          const data = await res.json();
+// ----------------------------------
+          //     🔥 PROFILE STATUS LOGIC
+          // ----------------------------------
+
+          // 1️⃣ Profile ACTIVATED → go to dashboard
+          if (data.isUserProfileActive === true) {
+            window.location.href = "index.html?userId=" + data.id;
+            return;
+          }
+
+          // 2️⃣ Profile CREATED but NOT ACTIVE → pending review
+          if (data.isUserProfileCreated === true && data.isUserProfileActive === false) {
+            window.location.href = "pending.html";
+            return;
+          }
+        }catch(e){
+          alert("Network error");
+        }
+        toggleEdit();
+      }
+
+    getProfile();
   </script>
 
 
 
-</main>
-  </div>
+
+  </main>
 
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("userId");
+
+      if (!userId) {
+        window.location.href = "login.html"
+        return;
+      }
+      document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
+        const url = new URL(link.getAttribute("href"), window.location.origin);
+        url.searchParams.set("userId", userId);
+        link.href = url.pathname + "?" + url.searchParams.toString();
+      });
+    });
+
+
+
+
     // Area chart (line filled) - user participation sample
     (function(){
       const ctx = document.getElementById('areaChart').getContext('2d');
@@ -514,6 +748,8 @@
         }
       });
     })();
+
   </script>
 </body>
 </html>
+  </div>

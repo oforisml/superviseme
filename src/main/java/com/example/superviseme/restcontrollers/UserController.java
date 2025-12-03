@@ -31,6 +31,16 @@ public class UserController {
         return userService.updateStudentProfile(request);
     }
 
+
+    @PutMapping(value = "/{userId}/status")
+    public ResponseEntity<?> changeProfileStatus(@PathVariable(name = "userId") UUID userId,
+                                               @RequestParam(name = "status") boolean status){
+        return updateProfile(new StudentProfileRecord(userId, null, null, null, null, status,
+                null, null,null, null, null, null, null, null));
+    }
+
+
+
     @GetMapping(value = "/{userId}")
     public ResponseEntity<?> getProfile(@PathVariable(name = "userId") UUID userId){
         return userService.getUser(userId);

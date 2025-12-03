@@ -525,6 +525,22 @@ Location: ${location}`);
   </div>
 
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("userId");
+
+      if (!userId) {
+        window.location.href = "login.html"
+        return;
+      }
+      document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
+        const url = new URL(link.getAttribute("href"), window.location.origin);
+        url.searchParams.set("userId", userId);
+        link.href = url.pathname + "?" + url.searchParams.toString();
+      });
+    });
+
+
     // Area chart (line filled) - user participation sample
     (function(){
       const ctx = document.getElementById('areaChart').getContext('2d');

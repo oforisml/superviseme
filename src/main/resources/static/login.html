@@ -160,13 +160,13 @@
 
                 // 1️⃣ Profile ACTIVATED → go to dashboard
                 if (data.isUserProfileActive === true) {
-                    window.location.href = "dashboard.html";
+                    window.location.href = "index.html?userId=" + data.id;
                     return;
                 }
 
                 // 2️⃣ Profile CREATED but NOT ACTIVE → pending review
                 if (data.isUserProfileCreated === true && data.isUserProfileActive === false) {
-                    alert("Your profile is pending review. Please wait for approval.");
+                    window.location.href = "pending.html";
                     return;
                 }
 

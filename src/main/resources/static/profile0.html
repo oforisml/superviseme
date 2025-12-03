@@ -164,9 +164,24 @@
   const params = new URLSearchParams(window.location.search);
   const userId = params.get('userId');
   const studentId = params.get('studentId');
-
   document.getElementById('userIdField').value = userId || '';
   document.getElementById('studentIdInput').value = studentId || '';
+
+  // Redirect all to login page
+  document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("userId");
+
+    if (!userId) {
+      window.location.href = "login.html"
+      return;
+    }
+    document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
+      const url = new URL(link.getAttribute("href"), window.location.origin);
+      url.searchParams.set("userId", userId);
+      link.href = url.pathname + "?" + url.searchParams.toString();
+    });
+  });
 
 
 
@@ -181,7 +196,7 @@
       pin: null,
       studentId: document.getElementById("studentIdInput").value,
       phoneNumber: document.getElementById("phoneInput").value,
-      isActive: true,
+      isActive: false,
       fullName: document.getElementById("fullNameInput").value,
       thesisTitle: document.getElementById("thesisInput").value,
       abstractText: document.getElementById("abstractInput").value,
@@ -203,8 +218,22 @@
         const error = await res.json();
         alert("Error: " + (error.message || "Unable to create profile"));
         return;
-      }else{
-        alert("Profile updated successfully!");
+      }
+        const data = await res.json();
+// ----------------------------------
+      //     🔥 PROFILE STATUS LOGIC
+      // ----------------------------------
+
+      // 1️⃣ Profile ACTIVATED → go to dashboard
+      if (data.isUserProfileActive === true) {
+        window.location.href = "index.html?userId=" + data.id;
+        return;
+      }
+
+      // 2️⃣ Profile CREATED but NOT ACTIVE → pending review
+      if (data.isUserProfileCreated === true && data.isUserProfileActive === false) {
+        window.location.href = "pending.html";
+        return;
       }
     }catch(e){
       alert("Network error");

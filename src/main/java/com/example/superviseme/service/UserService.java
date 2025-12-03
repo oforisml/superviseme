@@ -76,8 +76,8 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public boolean isEmailTaken(String email, UUID id) {
+        return userRepository.existsByEmailEqualsIgnoreCaseAndIdNot(email, id);
     }
 
     public List<User> findAllUsers() {
@@ -123,11 +123,12 @@ public class UserService {
         User user = findById(record.id());
 
         boolean isUserCreated = true;
-        boolean isUserProfileActive = false;
+
+        boolean isUserProfileActive = user.getStudentProfile() ==  null ? false : user.getStudentProfile().getIsActive();
 
         // Updating User record
         if (record.email() != null) {
-             if (existsByEmail(record.email().trim()))
+             if (isEmailTaken(record.email().trim(), record.id()))
                  throw new RuntimeException("Email already taken");
 
             user.setEmail(record.email().trim());
