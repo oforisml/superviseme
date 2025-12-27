@@ -2,6 +2,7 @@ package com.example.superviseme.service;
 
 import com.example.superviseme.entities.Chapter;
 import com.example.superviseme.entities.StudentChapter;
+import com.example.superviseme.entities.Submission;
 import com.example.superviseme.enums.StudentChapterStatus;
 import com.example.superviseme.record.StatisticsRecord;
 import com.example.superviseme.record.WeeklySubmission;
@@ -82,7 +83,7 @@ public class StudentChapterService {
 
     }
 
-    public ResponseEntity<?> findAllChaptersByStudentId(String studentId) {
+    public ResponseEntity<?> findAllChaptersByStudentId(UUID studentId) {
         List<StudentChapter> studentChapterList = repository.findByStudentIdOrderByCreatedAtAsc(studentId);
         return ResponseEntity.ok(studentChapterList);
 
@@ -273,5 +274,35 @@ public class StudentChapterService {
     public ResponseEntity<?> getCompletedChapters(String studentId){
     	List<StudentChapter> studentChapters = repository.findByStudentIdAndStatus(studentId,StudentChapterStatus.CLOSED);
     	return ResponseEntity.ok(studentChapters);    
+    }
+
+    public List<Map<String, String>> getRecentSubmissions(String studentId) {
+        List<Map<String, String>> recents = new ArrayList();
+
+        List<StudentChapter> studentChapters = repository.findByStudentIdEqualsIgnoreCase(studentId);
+        for (StudentChapter chapter : studentChapters) {
+
+            Map<String, String> sub = new HashMap<>();
+            sub.put("chapter", chapter.getChapter().getName());
+
+            // Find the latest submission once
+            Optional<Submission> latest = chapter.getSubmissions().stream()
+                    .max(Comparator.comparing(Submission::getCreatedAt));
+
+            // Add date only if submission exists
+            latest.map(Submission::getCreatedAt)
+                    .map(LocalDateTime::toString)
+                    .ifPresent(date -> sub.put("date", date));
+
+            // Add status only if submission exists
+            latest.map(Submission::getStatus)
+                    .map(Object::toString)
+                    .ifPresent(status -> sub.put("status", status.toLowerCase()));
+
+            recents.add(sub);
+        }
+
+
+        return recents;
     }
 }

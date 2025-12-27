@@ -14,6 +14,8 @@ import java.util.UUID;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
+    @Query("select count( distinct t) from tbl_submission t   where upper(t.studentChapter.studentId) = upper(?1) and t.status = ?2")
+    long countByStudentChapter_StudentIdEqualsIgnoreCaseAndStatusEquals(String studentId, SubmissionStatus status);
     @Query("SELECT WEEK(s.createdAt) AS week, COUNT(s) AS submissionCount " +
             "FROM tbl_submission s " +
             "JOIN s.studentChapter sc " +

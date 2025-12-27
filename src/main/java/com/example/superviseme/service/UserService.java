@@ -160,7 +160,8 @@ public class UserService {
             studentProfile.setIsActive(record.isActive());
 
 
-            if(record.isActive()){
+            // Create chapter one for student that does not exist
+            if(record.isActive() && !studentChapterRepository.existsByStudentIdEqualsIgnoreCase(user.getStudentId())){
                 StudentChapter studentChapter = new StudentChapter();
                 studentChapter.setStudentId(user.getStudentId());
                 studentChapter.setStatus(StudentChapterStatus.OPENED);

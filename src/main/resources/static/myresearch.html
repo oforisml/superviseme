@@ -1,266 +1,583 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Research — DRAKA</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>My Research — DRAKA</title>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    :root{
-      --sidebar-w: 260px;
-      --bg:#f4f6fb;
-      --card:#ffffff;
-      --muted:#7b8896;
-      --accent:#2f6ee8;
-      --soft:#eef6ff;
-      --border:#e6ecf5;
-      --radius:12px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      background:var(--bg);
-      color:#0f1724;
-      display:flex;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      line-height:1.35;
-      font-size:14px;
-    }
-    .app { display:flex; width:100%; height:100vh; overflow:hidden; }
-    .sidebar{
-      width:var(--sidebar-w); min-width:var(--sidebar-w); height:100vh;
-      background:linear-gradient(180deg,#0b1220,#0f1724 70%);
-      color:#fff; padding:26px 18px; display:flex; flex-direction:column;
-    }
-    .brand{ font-weight:700; font-size:20px; letter-spacing:0.6px; margin-bottom:4px; }
-    .brand-sub{ font-size:12px; opacity:.85; color:rgba(255,255,255,.9); margin-top:2px; }
-    .nav{ margin-top:18px; display:flex; flex-direction:column; gap:8px; flex:1; }
-    .nav a{
-      display:flex; gap:12px; align-items:center; padding:10px;
-      border-radius:10px; color:rgba(255,255,255,0.92); text-decoration:none; font-size:14px;
-    }
-    .nav a .ico{
-      width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.08);
-      display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;
-    }
-    .nav a.active{ background:rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); }
-    .sidebar-footer{ margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px; }
-    .user-row{display:flex;gap:12px;align-items:center}
-    .avatar{
-      width:44px;height:44px;border-radius:50%;
-      background:linear-gradient(135deg,var(--accent),#4fb0ff);
-      display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:14px;
-    }
-    .user-info{font-size:13px}
-    .user-info .name{font-weight:600}
-    .user-info .role{color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px}
-    .logout{
-      margin-top:10px; background:transparent; border:1px solid rgba(255,255,255,0.08);
-      color:#fff; padding:8px 10px; border-radius:8px; font-size:13px; cursor:pointer; width:100%;
-    }
-    .main{ flex:1; padding:26px; overflow:auto; }
-    .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; }
-    .welcome h1{ margin:0;font-size:22px; }
-    .welcome p{ margin:6px 0 0;color:var(--muted);font-size:13px; }
-    .cards{
-      display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:10px; margin-bottom:18px;
-    }
-    .card{
-      background:var(--card); border-radius:var(--radius); padding:14px; border:1px solid var(--border);
-      box-shadow:0 3px 10px rgba(15,23,36,0.03); min-height:96px; display:flex; flex-direction:column;
-      justify-content:space-between;
-    }
-    .card .label{font-size:12px;color:var(--muted)}
-    .card .value{font-size:18px;font-weight:700;margin-top:6px}
-    .card .sub{font-size:12px;color:#9aa4b3;margin-top:8px}
-    /* New actions buttons */
-    .actions-row { display: flex; gap: 14px; margin-bottom: 14px; }
-    .icon-btn {
-      display: flex; align-items: center; gap: 7px; padding: 8px 16px; font-size: 13px;
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
-      color: #2f6ee8; font-weight: 500; transition: background 0.2s
-    }
-    .icon-btn:hover { background: var(--soft); }
-    .muted{color:var(--muted)}
-    .chapter-submission-panel{ display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;background:var(--card);padding:18px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border); }
-    .submission-meta{margin-bottom:10px;}
-    .feedback-panel{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:14px;}
-    /* Responsive */
-    @media (max-width:1100px){ .cards{grid-template-columns:repeat(2,1fr);} .sidebar{display:none;} }
-    @media (max-width:800px){ .actions-row, .chapter-submission-panel, .submission-meta, .feedback-panel {flex-direction:column;} .chapter-submission-panel > div {min-width:unset;} }
-    @media (max-width:640px){ body{font-size:13px;} .cards{grid-template-columns:1fr;} }
-  
-      #editor {
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      min-height: 200px;
-      padding: 10px;
-    }
-    #upload-section {
-      margin-top: 10px;
-    }
-    
+    <style>
+        :root {
+            --sidebar-w: 260px;
+            --bg: #f4f6fb;
+            --card: #ffffff;
+            --muted: #7b8896;
+            --accent: #2f6ee8;
+            --soft: #eef6ff;
+            --border: #e6ecf5;
+            --radius: 12px;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: #0f1724;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.35;
+            font-size: 14px;
+        }
+
+        .app {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            height: 100vh;
+            background: linear-gradient(180deg, #0b1220, #0f1724 70%);
+            color: #fff;
+            padding: 26px 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+
+        .brand-sub {
+            font-size: 12px;
+            opacity: .85;
+            color: rgba(255, 255, 255, .9);
+            margin-top: 2px;
+        }
+
+        .nav {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .nav a {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav a .ico {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11px;
+        }
+
+        .nav a.active {
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+        }
+
+        .sidebar-footer {
+            margin-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+        }
+
+        .user-row {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #4fb0ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 14px;
+        }
+
+        .user-info {
+            font-size: 13px
+        }
+
+        .user-info .name {
+            font-weight: 600
+        }
+
+        .user-info .role {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 12px;
+            margin-top: 2px
+        }
+
+        .logout {
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .main {
+            flex: 1;
+            padding: 26px;
+            overflow: auto;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .welcome h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .welcome p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 10px;
+            margin-bottom: 18px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 3px 10px rgba(15, 23, 36, 0.03);
+            min-height: 96px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card .label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .card .value {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 6px
+        }
+
+        .card .sub {
+            font-size: 12px;
+            color: #9aa4b3;
+            margin-top: 8px
+        }
+
+        /* New actions buttons */
+        .actions-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            font-size: 13px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            color: #2f6ee8;
+            font-weight: 500;
+            transition: background 0.2s
+        }
+
+        .icon-btn:hover {
+            background: var(--soft);
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .chapter-submission-panel {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            background: var(--card);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+        }
+
+        .submission-meta {
+            margin-bottom: 10px;
+        }
+
+        .feedback-panel {
+            background: var(--card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .cards {
+                grid-template-columns:repeat(2, 1fr);
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .actions-row, .chapter-submission-panel, .submission-meta, .feedback-panel {
+                flex-direction: column;
+            }
+
+            .chapter-submission-panel > div {
+                min-width: unset;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                font-size: 13px;
+            }
+
+            .cards {
+                grid-template-columns:1fr;
+            }
+        }
+
+        #editor {
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            min-height: 200px;
+            padding: 10px;
+        }
+
+        #upload-section {
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 <body>
 <div class="app" role="application" aria-label="Dashboard app">
-  <!-- SIDEBAR -->
-  <aside class="sidebar" role="complementary" aria-label="Sidebar">
-    <div>
-      <div class="brand">DRAKA</div>
-      <div class="brand-sub">Thesis Management</div>
-    </div>
-    <nav class="nav" aria-label="Main navigation">
-      <a href="index.html"><span class="ico">D</span><span>Dashboard</span></a>
-      <a class="active" href="#"><span class="ico">R</span><span>My Research</span></a>
-      <a href="resources.html"><span class="ico">S</span><span>Resources</span></a>
-      <a href="meetings.html"><span class="ico">M</span><span>Meetings</span></a>
-      <a href="profile.html"><span class="ico">P</span><span>Profile</span></a>
-      <a href="settings.html"><span class="ico">⚙</span><span>Settings</span></a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-row">
-        <div class="avatar" aria-hidden="true">OF</div>
-        <div class="user-info">
-          <div class="name">OFORI</div>
-          <div class="role">Graduate Student</div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" role="complementary" aria-label="Sidebar">
+        <div>
+            <div class="brand">DRAKA</div>
+            <div class="brand-sub">Thesis Management</div>
         </div>
-      </div>
-      <button class="logout" aria-label="Log out">Log out</button>
-    </div>
-  </aside>
+        <nav class="nav" aria-label="Main navigation">
+            <a href="index.html"><span class="ico">D</span><span>Dashboard</span></a>
+            <a class="active" href="#"><span class="ico">R</span><span>My Research</span></a>
+            <a href="resources.html"><span class="ico">S</span><span>Resources</span></a>
+            <a href="meetings.html"><span class="ico">M</span><span>Meetings</span></a>
+            <a href="profile.html"><span class="ico">P</span><span>Profile</span></a>
+            <a href="settings.html"><span class="ico">⚙</span><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-row">
+                <div class="avatar" aria-hidden="true">OF</div>
+                <div class="user-info">
+                    <div class="name">OFORI</div>
+                    <div class="role">Graduate Student</div>
+                </div>
+            </div>
+            <button class="logout" aria-label="Log out">Log out</button>
+        </div>
+    </aside>
 
-  <!-- MAIN -->
-  <main class="main" role="main">
-    <div class="top-row">
-      <div class="welcome">
-        <h1>My Research</h1>
-        <p>Manage your chapter submissions and track progress</p>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button onclick="window.location='index.html';" style="padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;">Back to Dashboard</button>
-      </div>
-    </div>
+    <!-- MAIN -->
+    <main class="main" role="main">
+        <div class="top-row">
+            <div class="welcome">
+                <h1>My Research</h1>
+                <p>Manage your chapter submissions and track progress</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+                <button onclick="window.location='index.html';"
+                        style="padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
 
-    <!-- 4 Cards -->
-    <section class="cards" aria-label="Status cards">
-      <article class="card" aria-labelledby="c1">
-        <div class="label">Progress</div>
-        <div id="c1" class="value">0%</div>
-        <div class="sub">[Progress Bar]</div>
-      </article>
-      <article class="card" aria-labelledby="c2">
-        <div class="label">Submissions</div>
-        <div id="c2" class="value">1</div>
-        <div class="sub">[More information related to submissions]</div>
-      </article>
-      <article class="card" aria-labelledby="c3">
-        <div class="label">Comments</div>
-        <div id="c3" class="value">1</div>
-        <div class="sub">[Sub text related to comments]</div>
-      </article>
-      <article class="card" aria-labelledby="c4">
-        <div class="label">Action</div>
-        <div id="c4" class="value">[Data]</div>
-        <div class="sub">[Text related to Actions to take]</div>
-      </article>
-    </section>
+        <!-- 4 Cards -->
+        <section class="cards" aria-label="Status cards">
+            <article class="card" aria-labelledby="c1">
+                <div class="label">Progress</div>
+                <div id="c1" class="value">0%</div>
+                <div class="sub">[Progress Bar]</div>
+            </article>
+            <article class="card" aria-labelledby="c2">
+                <div class="label">Submissions</div>
+                <div id="c2" class="value">1</div>
+                <div class="sub">[More information related to submissions]</div>
+            </article>
+            <article class="card" aria-labelledby="c3">
+                <div class="label">Comments</div>
+                <div id="c3" class="value">1</div>
+                <div class="sub">[Sub text related to comments]</div>
+            </article>
+            <article class="card" aria-labelledby="c4">
+                <div class="label">Action</div>
+                <div id="c4" class="value">[Data]</div>
+                <div class="sub">[Text related to Actions to take]</div>
+            </article>
+        </section>
 
-    <!-- Actions row -->
-    <section class="actions-row">
-      <button class="icon-btn"><span class="ico">📄</span>Chapters</button>
-      <button class="icon-btn"><span class="ico">🎯</span>Milestones</button>
-      <button class="icon-btn"><span class="ico">🗂️</span>Documents</button>
-    </section>
+        <!-- Actions row -->
+        <section class="actions-row">
+            <button class="icon-btn"><span class="ico">📄</span>Chapters</button>
+            <button class="icon-btn"><span class="ico">🎯</span>Milestones</button>
+            <button class="icon-btn"><span class="ico">🗂️</span>Documents</button>
+        </section>
 
-    <!-- Chapter Submissions Header -->
-    <div style="margin-bottom:18px;">
-      <h2 style="margin-bottom:4px;font-size:18px;">Chapter Submissions</h2>
-      <p class="muted" style="margin:0 0 10px 0;font-size:13px;">Submit chapter drafts and communicate with your supervisor.</p>
-    </div>
+        <!-- Chapter Submissions Header -->
+        <div style="margin-bottom:18px;">
+            <h2 style="margin-bottom:4px;font-size:18px;">Chapter Submissions</h2>
+            <p class="muted" style="margin:0 0 10px 0;font-size:13px;">Submit chapter drafts and communicate with your
+                supervisor.</p>
+        </div>
 
-    <!-- Expandable submission section -->
-    <div class="chapter-submission-panel">
-      <div style="flex:2;min-width:220px;">
-        <details>
-          <summary style="font-size:16px;font-weight:600;cursor:pointer;">
-            Chapter 1: Introduction
-            <span style="margin-left:8px;">
+        <!-- Expandable submission section -->
+        <div class="chapter-submission-panel">
+            <div style="flex:2;min-width:220px;">
+                <details>
+                    <summary style="font-size:16px;font-weight:600;cursor:pointer;">
+                        Chapter 1: Introduction
+                        <span style="margin-left:8px;">
               <button style="background:#fbbf24;color:#fff;border:none;border-radius:7px;padding:3px 9px;font-size:11px;">In Progress</button>
             </span>
-          </summary>
-          <div style="margin-top:10px;">
-            <!-- Adding new text area-->
-             <div>
-               <!--<textarea placeholder="Add your research data..." style="width:100%;min-height:60px;border-radius:7px;border:1px solid var(--border);padding:7px;font-family:inherit;"></textarea> -->
+                    </summary>
+                    <div style="margin-top:10px;">
 
+                        <!-- Submission list -->
+                        <div id="submission-list" style="display:none;">
+                            <div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
+                                <b style="font-size:13px;">Submission v1</b>
+                                <p class="muted" style="margin:6px 0 0;">Draft submitted</p>
+                            </div>
+                        </div>
 
-<div id="toolbar">
-  <button type="button" onclick="formatText('bold')" title="Bold"><b>B</b></button>
-  <button type="button" onclick="formatText('italic')" title="Italic"><i>I</i></button>
-  <button type="button" onclick="formatText('underline')" title="Underline"><u>U</u></button>
-</div>
+                        <!-- Submission form -->
+                        <div id="submission-form" style="display:none;">
 
-<textarea id="editor" contenteditable="true" spellcheck="true" aria-label="Text editor" placeholder="Add your research data..." style="width:100%;min-height:60px;border-radius:7px;border:1px solid var(--border);padding:7px;font-family:inherit;">
-</textarea>
+                            <div id="toolbar">
+                                <button type="button" onclick="formatText('bold')"><b>B</b></button>
+                                <button type="button" onclick="formatText('italic')"><i>I</i></button>
+                                <button type="button" onclick="formatText('underline')"><u>U</u></button>
+                            </div>
 
-<div id="upload-section">
-  <label for="fileInput">Upload a text file (.txt, .doc, .docx): </label>
-  <input type="file" id="fileInput" accept=".txt,.doc,.docx" />
-</div>
-</div>
-           
-          </div>
-        </details>
-      </div>
-      <div style="flex:1;display:flex;justify-content:flex-end;align-items:start;min-width:150px;">
-        <button class="btn" onclick="alert('Upload New Submission')" style="padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">+ New Submission</button>
-      </div>
-    </div>
+                            <textarea
+                                    id="editor"
+                                    spellcheck="true"
+                                    placeholder="Add your research data..."
+                                    style="width:100%;min-height:120px;border-radius:7px;border:1px solid var(--border);padding:7px;font-family:inherit;">
+    </textarea>
 
-    <!-- Submission meta info -->
-    <div class="submission-meta">
-      <button style="background:#f97316;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:12px;">Submissions: 1</button>
-      <span style="margin-left:14px;color:#7b8896;font-size:13px;">I am still learning how to use this section</span>
-      <br>
-      <span style="color:#2f6ee8;padding-top:3px;font-size:12px;display:block;">Course Outline: DRAFT_v1.0_2025/11/19</span>
-    </div>
+                            <div id="upload-section" style="margin-top:8px;">
+                                <label for="fileInput">Upload a text file (.txt, .doc, .docx):</label>
+                                <input type="file" id="fileInput" accept=".txt,.doc,.docx"/>
+                            </div>
 
-    <!-- Supervisor Feedback -->
-    <div class="feedback-panel">
-      <b style="font-size:13px;color:#253244;">Supervisor Feedback</b>
-      <div style="margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">PC Draka: Noted</button>
-        <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">PC Draka: Noted</button>
-        <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">PC Draka: Noted</button>
-      </div>
-    </div>
+                            <!-- Save button -->
+                            <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+                                <button
+                                        type="button"
+                                        onclick="saveSubmission()"
+                                        style="padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">
+                                    Save Submission
+                                </button>
+                            </div>
 
+                        </div>
+                    </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get("userId");
+                </details>
+            </div>
+            <div style="flex:1;display:flex;justify-content:flex-end;align-items:start;min-width:150px;">
+                <button class="btn"
+                        onclick="showSubmissionForm()"
+                        style="padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">
+                    + New Submission
+                </button>
 
-        if (!userId) {
-          window.location.href = "login.html"
-          return;
-        }
-        document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
-          const url = new URL(link.getAttribute("href"), window.location.origin);
-          url.searchParams.set("userId", userId);
-          link.href = url.pathname + "?" + url.searchParams.toString();
-        });
-      });
+            </div>
+        </div>
 
-    </script>
-  </main>
+        <!-- Submission meta info -->
+        <div class="submission-meta">
+            <button style="background:#f97316;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:12px;">
+                Submissions: 1
+            </button>
+            <span style="margin-left:14px;color:#7b8896;font-size:13px;">I am still learning how to use this section</span>
+            <br>
+            <span style="color:#2f6ee8;padding-top:3px;font-size:12px;display:block;">Course Outline: DRAFT_v1.0_2025/11/19</span>
+        </div>
+
+        <!-- Supervisor Feedback -->
+        <div class="feedback-panel">
+            <b style="font-size:13px;color:#253244;">Supervisor Feedback</b>
+            <div style="margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">
+                    PC Draka: Noted
+                </button>
+                <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">
+                    PC Draka: Noted
+                </button>
+                <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">
+                    PC Draka: Noted
+                </button>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get("userId");
+
+                if (!userId) {
+                    window.location.href = "login.html"
+                    return;
+                }
+                document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
+                    const url = new URL(link.getAttribute("href"), window.location.origin);
+                    url.searchParams.set("userId", userId);
+                    link.href = url.pathname + "?" + url.searchParams.toString();
+                });
+            });
+
+            // Toggle this to simulate screenshots
+            // true  = submissions exist
+            // false = no submissions
+            const hasSubmissions = true;
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const submissionList = document.getElementById("submission-list");
+                const submissionForm = document.getElementById("submission-form");
+
+                if (hasSubmissions) {
+                    submissionList.style.display = "block";
+                    submissionForm.style.display = "none";
+                } else {
+                    submissionList.style.display = "none";
+                    submissionForm.style.display = "block";
+                }
+            });
+
+            function showSubmissionForm() {
+                document.getElementById("submission-form").style.display = "block";
+            }
+
+            function formatText(command) {
+                document.execCommand(command, false, null);
+            }
+
+            async function saveSubmission() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get("userId");
+
+                if (!userId) {
+                    alert("No userId provided in URL");
+                    return;
+                }
+
+                const content = document.getElementById("editor").value;
+                const fileInput = document.getElementById("fileInput");
+                const file = fileInput.files[0] || null;
+
+                if (!content.trim() && !file) {
+                    alert("Please add text or upload a file before saving.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("content", content);
+                if (file) formData.append("file", file);
+
+                try {
+                    const res = await fetch(`/student-chapter/student/${userId}`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        alert(data.message || "Failed to save submission");
+                        return;
+                    }
+
+                    // UI update after successful save
+                    document.getElementById("submission-form").style.display = "none";
+                    document.getElementById("submission-list").style.display = "block";
+
+                    alert("Submission saved successfully.");
+
+                } catch (e) {
+                    console.error(e);
+                    alert("An error occurred while saving submission.");
+                }
+            }
+        </script>
+
+    </main>
 </div>
 </body>
 </html>

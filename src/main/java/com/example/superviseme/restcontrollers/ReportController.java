@@ -18,7 +18,7 @@ public class ReportController {
         this.reportService = reportService;
     }
     @GetMapping("{id}")
-    public ResponseEntity<?> getUserReport(@PathVariable(name = "id") String userId){
+    public ResponseEntity<?> getUserReport(@PathVariable(name = "id") UUID userId){
         return reportService.getUserGraphData(userId);
     }
 }

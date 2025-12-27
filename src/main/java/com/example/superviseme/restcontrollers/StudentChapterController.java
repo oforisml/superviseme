@@ -25,7 +25,7 @@ public class StudentChapterController {
 
 //    todo: Get student chapter
     @GetMapping(value = "{studentid}")
-    public ResponseEntity<?> getChapters(@PathVariable(name = "studentid") String studentId){
+    public ResponseEntity<?> getChapters(@PathVariable(name = "studentid") UUID studentId){
         return service.findAllChaptersByStudentId(studentId);
     }
 
