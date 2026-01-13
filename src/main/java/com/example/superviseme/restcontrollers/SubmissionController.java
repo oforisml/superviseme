@@ -4,6 +4,7 @@ package com.example.superviseme.restcontrollers;
 import com.example.superviseme.enums.SubmissionStatus;
 import com.example.superviseme.record.SubmissionRecord;
 import com.example.superviseme.service.SubmissionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/submissions")
-@CrossOrigin(origins = "*")
+
+@Tag(name = "Submission Controller",
+        description = "The endpoints herein are for the CRUD that would be used for submissions management")
 
 public class SubmissionController {
     private final SubmissionService service;

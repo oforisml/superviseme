@@ -277,6 +277,289 @@
       </div>
 
     <script>
+      async function fetchReportData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("userId");
+
+        if (!userId) {
+          alert("No userId provided in URL");
+          return {monthly: [], weekly: []};
+        }
+
+        try {
+          const res = await fetch(`/report/research/${userId}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"}
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            alert("An error occurred: " + data.message);
+            return {monthly: [], weekly: []};
+          }
+
+          const monthly = Object.entries(data.monthly).map(([month, values]) => ({
+            month,
+            ...values
+          }));
+
+          const weekly = data.weekly.map(w => ({
+            week: w.weekName,
+            count: w.count
+          }));
+
+          const totalChapters = data.totalChapters
+          const totalCompletedChapters = data.totalChaptersCompleted;
+          const totalSubmittedForStudentChapter = data.totalSubmittedForStudentChapter;
+          const totalPendingReviews = data.totalPendingReview
+
+          // Get the element with id "c3"
+          const milestoneElement = document.getElementById("c3");
+          milestoneElement.textContent = totalCompletedChapters;
+
+          const subElement = milestoneElement.parentElement.querySelector(".sub");
+          subElement.textContent = `Out of ${totalChapters} milestones`; // dynamically set new total
+
+          const totalPendingReview = document.getElementById("c2");
+          totalPendingReview.textContent = totalPendingReviews;
+
+
+          const currentChapter = data.currentChapter
+
+          const currentChapterObject = document.getElementById("c1");
+          currentChapterObject.textContent = currentChapter;
+
+          const stageSubElement = currentChapterObject.parentElement.querySelector(".sub");
+          stageSubElement.textContent = `Stage ${totalSubmittedForStudentChapter} of ${totalChapters}`
+
+
+          const userInfoDiv = document.querySelector(".user-info"); // the container
+          const nameDiv = userInfoDiv.querySelector(".name");
+          const roleDiv = userInfoDiv.querySelector(".role");
+
+          nameDiv.textContent = data.lastName.toUpperCase();
+          roleDiv.textContent = `${data.researchArea}`;
+
+
+          const welcomeDiv = document.querySelector(".welcome");
+          welcomeDiv.querySelector("h1").textContent = `Welcome back, ${data.lastName}!`;
+          welcomeDiv.querySelector("p").textContent = `${data.program} Student • ${data.researchArea}`;
+
+
+          const abbreviation = data.abbreviations
+          const userRow = document.querySelector(".user-row");
+
+          const avatarDiv = userRow.querySelector(".avatar");
+          const sideBarName = userRow.querySelector(".name");
+          const sidebarRole = userRow.querySelector(".role");
+
+
+          avatarDiv.textContent = abbreviation;
+          sideBarName.textContent = data.lastName;
+          sidebarRole.textContent = `${data.program} Student`;
+
+
+          const recents = data.recents;
+          const recentsList = document.getElementById("recent-items");
+
+          recents.forEach(r => {
+            const submissionDate = new Date(r.date);
+            const now = new Date();
+            const diffMs = now - submissionDate;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            // Determine background color based on status
+            let bgColor = "#ffe066";  // default yellow
+            let textColor = "#665c00"; // default text color
+
+            if (r.status.toUpperCase() === "ACCEPTED") {
+              bgColor = "#d7ffd7";    // green background
+              textColor = "#257942";   // green text
+            } else if (r.status.toUpperCase() === "REJECTED") {
+              bgColor = "#ffd7d7";    // red background
+              textColor = "#a00000";   // red text
+            } // else keep yellow for pending
+
+            const li = document.createElement("li");
+            li.innerHTML = `
+                    <strong>${r.chapter}</strong>
+                    <span style="color:#7b8896;">Submitted ${diffDays} days ago</span>
+                    <span style="background:${bgColor};color:${textColor};padding:2px 10px;border-radius:6px;margin-left:10px;font-size:12px;">${r.status}</span>
+                `;
+
+            recentsList.appendChild(li);
+          });
+
+
+
+
+
+
+
+          // render Area Chart
+          const ctx1 = document.getElementById('areaChart').getContext('2d');
+          const gradient = ctx1.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, 'rgba(47,110,232,0.18)');
+          gradient.addColorStop(1, 'rgba(47,110,232,0.02)');
+
+          // Prepare data for the chart
+
+          // Labels are months
+          const labels = monthly.map(m => m.month);
+
+          console.log("labels: ", labels)
+
+          // Total Y-axis values
+          const totals = monthly.map(m =>
+                  ['submissions', 'meetings'].reduce((sum, key) => sum + (m[key] || 0), 0)
+          );
+
+          console.log("Totals: ", totals)
+
+
+          // Custom tooltip callback to show breakdown
+          const tooltipCallbacks = {
+            callbacks: {
+              label: function (context) {
+                const monthData = monthly[context.dataIndex];
+                const submissions = monthData.submissions || 0;
+                const meetings = monthData.meetings || 0;
+                return [`Submission: ${submissions}`, `Meetings: ${meetings}`];
+              }
+            }
+          };
+
+          new Chart(ctx1, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Total',
+                data: totals,
+                fill: true,
+                backgroundColor: gradient,
+                borderColor: '#2f6ee8',
+                tension: 0.35,
+                pointRadius: 3,
+                pointBackgroundColor: '#2f6ee8',
+                borderWidth: 2
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {display: false},
+                tooltip: tooltipCallbacks
+              },
+              scales: {
+                x: {grid: {display: false}, ticks: {color: '#667085'}},
+                y: {
+                  ticks: {color: '#667085', precision: 0},
+                  grid: {color: '#eef3ff'}
+                }
+              }
+            }
+          });
+
+
+
+
+          // Render Doghtnut chart
+          const ctx2 = document.getElementById('donutChart').getContext('2d');
+          new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+              labels: ['Submitted', 'Remaining'],
+              datasets: [{
+                data: [totalSubmittedForStudentChapter, totalChapters],
+                backgroundColor: ['#2f6ee8', '#e6eefc'],
+                hoverBackgroundColor: ['#2f6ee8', '#e6eefc'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              cutout: '68%',
+              plugins: {
+                legend: {display: false},
+                tooltip: {callbacks: {label: (ctx) => ctx.label + ': ' + ctx.parsed}}
+              }
+            }
+          });
+
+          // add center text for percent
+          // Chart.js v4 doesn't provide easy center text; this draws over the canvas.
+          const canvas = document.getElementById('donutChart');
+          const ctx3 = canvas.getContext('2d');
+
+          function drawCenter() {
+            const width = canvas.width;
+            const height = canvas.height;
+            // wait a tick to ensure chart is drawn
+            setTimeout(() => {
+              ctx3.save();
+              ctx3.font = '600 18px Inter, Arial';
+              ctx3.fillStyle = '#0f1724';
+              ctx3.textAlign = 'center';
+              ctx3.textBaseline = 'middle';
+              ctx3.fillText('25%', width / 2, height / 2);
+              ctx3.restore();
+            }, 120);
+          }
+
+          drawCenter();
+
+
+          // Render weekly chart
+          const ctx4 = document.getElementById('weeklyBarChart').getContext('2d');
+
+          new Chart(ctx4, {
+            type: 'bar',
+            data: {
+              labels: weekly.map(w => w.week),         // dynamically set week labels
+              datasets: [{
+                label: 'Submissions',
+                data: weekly.map(w => w.count),       // dynamically set data
+                backgroundColor: '#2f6ee8'
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {display: false},
+                tooltip: {mode: 'index', intersect: false}
+              },
+              scales: {
+                x: {grid: {display: false}, ticks: {color: '#667085'}},
+                y: {
+                  beginAtZero: true,
+                  suggestedMin: 0,
+                  min: 0,
+                  ticks: {
+                    color: '#667085',
+                    stepSize: 1,    // Increment by 1
+                    precision: 0
+                  },
+                  grid: {color: '#eef3ff'}
+                }
+              }
+            }
+          });
+
+
+          return {
+            monthly, weekly, totalChapters,
+            totalCompletedChapters, totalSubmittedForStudentChapter,
+            totalPendingReviews, currentChapter
+          };
+
+        } catch (e) {
+          alert("An error occurred: " + e);
+          console.log("An error occurred: " + e);
+          return {monthly: [], weekly: []};
+        }
+      }
       document.addEventListener("DOMContentLoaded", () => {
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get("userId");
@@ -290,6 +573,10 @@
           url.searchParams.set("userId", userId);
           link.href = url.pathname + "?" + url.searchParams.toString();
         });
+
+
+        // populate
+        fetchReportData();
       });
 
     </script>

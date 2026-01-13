@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
@@ -78,6 +79,56 @@ public class ReportService {
         combined.put("abbreviation", abbreviation);
         combined.put("recents", recents);
 
+
+        return ResponseEntity.ok(combined);
+    }
+
+    /**
+     * This method focuses on returning data for the research page
+     * @param userId
+     * @return
+     */
+    public ResponseEntity<?> getStudentResearchPageDetails(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Action Required
+        long actionRequiredChapters = submissionRepository.countDistinctByStatusEqualsAndStudentChapter_StudentIdEquals(SubmissionStatus.REJECTED, user.getStudentId());
+
+        // Student chapters
+        List<StudentChapter> studentChapterList = studentChapterRepository.findByStudentIdEqualsOrderByCreatedAtDesc(user.getStudentId());
+
+        // Total chapters
+        long totalChapters = chapterRepository.count();
+
+        // Total Completed / Accepted chapters
+        long approvedSubmissions = submissionRepository.countDistinctByStatusEqualsAndStudentChapter_StudentIdEquals(SubmissionStatus.ACCEPTED, user.getStudentId());
+
+        Set<Submission> submissions = studentChapterList.stream().flatMap(studentChapter -> studentChapter.getSubmissions().stream()).collect(Collectors.toSet());
+
+        long totalSubmissions = submissions.size();
+
+        // Total chapters created
+        long totalCompletedChapters = studentChapterRepository.countBySubmissions_StatusEqualsAndSubmissions_StudentChapter_StudentIdEquals(SubmissionStatus.ACCEPTED, user.getStudentId());
+
+        // Percentage of chapters
+        double percentageCompleted = (totalCompletedChapters * 100) / totalChapters;
+
+        String names[] = user.getStudentProfile().getFullName().split(" ");
+        String lastName = names[names.length -1];
+
+        String abbreviation = "";
+        for(String name : names)
+            abbreviation+=name.substring(0,1).toUpperCase();
+
+        Map<String, Object> combined = new HashMap<>();
+        combined.put("pendingAction",actionRequiredChapters);
+        combined.put("totalChapters", totalChapters);
+        combined.put("approvedSubmissions", approvedSubmissions);
+        combined.put("totalSubmissions", totalSubmissions );
+        combined.put("lastName", lastName);
+        combined.put("abbreviation", abbreviation);
+        combined.put("percentageCompleted", percentageCompleted);
+        combined.put("studentChapters", studentChapterList);
 
         return ResponseEntity.ok(combined);
     }

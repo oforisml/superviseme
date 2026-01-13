@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>My Research — DRAKA</title>
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
             --sidebar-w: 260px;
@@ -18,23 +15,15 @@
             --soft: #eef6ff;
             --border: #e6ecf5;
             --radius: 12px;
-            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
         }
 
-        * {
-            box-sizing: border-box
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
             min-height: 100vh;
             background: var(--bg);
-            color: #0f1724;
             display: flex;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            line-height: 1.35;
-            font-size: 14px;
         }
 
         .app {
@@ -44,6 +33,7 @@
             overflow: hidden;
         }
 
+        /* ================= SIDEBAR ================= */
         .sidebar {
             width: var(--sidebar-w);
             min-width: var(--sidebar-w);
@@ -55,19 +45,8 @@
             flex-direction: column;
         }
 
-        .brand {
-            font-weight: 700;
-            font-size: 20px;
-            letter-spacing: 0.6px;
-            margin-bottom: 4px;
-        }
-
-        .brand-sub {
-            font-size: 12px;
-            opacity: .85;
-            color: rgba(255, 255, 255, .9);
-            margin-top: 2px;
-        }
+        .brand { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .brand-sub { font-size: 12px; opacity: .85; margin-top: 2px; }
 
         .nav {
             margin-top: 18px;
@@ -83,38 +62,36 @@
             align-items: center;
             padding: 10px;
             border-radius: 10px;
-            color: rgba(255, 255, 255, 0.92);
+            color: rgba(255,255,255,.92);
             text-decoration: none;
-            font-size: 14px;
-        }
-
-        .nav a .ico {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.08);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 11px;
         }
 
         .nav a.active {
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+            background: rgba(255,255,255,.06);
+        }
+
+        .ico {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: rgba(255,255,255,.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
         }
 
         .sidebar-footer {
-            margin-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255,255,255,.05);
             padding-top: 12px;
+            margin-top: 12px;
         }
 
         .user-row {
             display: flex;
             gap: 12px;
-            align-items: center
+            align-items: center;
         }
 
         .avatar {
@@ -127,27 +104,16 @@
             justify-content: center;
             font-weight: 700;
             color: white;
-            font-size: 14px;
         }
 
-        .user-info {
-            font-size: 13px
-        }
-
-        .user-info .name {
-            font-weight: 600
-        }
-
-        .user-info .role {
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 12px;
-            margin-top: 2px
-        }
+        .user-info { font-size: 13px; }
+        .user-info .name { font-weight: 600; }
+        .user-info .role { color: rgba(255,255,255,.85); font-size: 12px; margin-top: 2px; }
 
         .logout {
             margin-top: 10px;
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255,255,255,.08);
             color: #fff;
             padding: 8px 10px;
             border-radius: 8px;
@@ -156,36 +122,22 @@
             width: 100%;
         }
 
+        /* ================= MAIN ================= */
         .main {
             flex: 1;
             padding: 26px;
             overflow: auto;
         }
 
-        .top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .welcome h1 {
-            margin: 0;
-            font-size: 22px;
-        }
-
-        .welcome p {
-            margin: 6px 0 0;
-            color: var(--muted);
-            font-size: 13px;
+        .main h1 {
+            margin-bottom: 18px;
+            font-size: 24px;
         }
 
         .cards {
             display: grid;
-            grid-template-columns:repeat(4, 1fr);
+            grid-template-columns: repeat(4,1fr);
             gap: 14px;
-            margin-top: 10px;
             margin-bottom: 18px;
         }
 
@@ -194,136 +146,265 @@
             border-radius: var(--radius);
             padding: 14px;
             border: 1px solid var(--border);
-            box-shadow: 0 3px 10px rgba(15, 23, 36, 0.03);
-            min-height: 96px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(15,23,36,.03);
         }
 
         .card .label {
             font-size: 12px;
-            color: var(--muted)
+            color: var(--muted);
+            margin-bottom: 6px;
         }
 
         .card .value {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 700;
-            margin-top: 6px
         }
 
-        .card .sub {
-            font-size: 12px;
-            color: #9aa4b3;
-            margin-top: 8px
-        }
-
-        /* New actions buttons */
         .actions-row {
             display: flex;
             gap: 14px;
-            margin-bottom: 14px;
+            margin-bottom: 18px;
         }
 
         .icon-btn {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 16px;
-            font-size: 13px;
-            background: var(--card);
-            border: 1px solid var(--border);
+            padding: 10px 18px;
             border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
             cursor: pointer;
-            color: #2f6ee8;
+            color: #0f1724;
+            font-size: 14px;
             font-weight: 500;
-            transition: background 0.2s
+            transition: all 0.2s;
         }
 
         .icon-btn:hover {
             background: var(--soft);
         }
 
-        .muted {
-            color: var(--muted)
+        .icon-btn.active {
+            background: var(--soft);
+            border-color: var(--accent);
+            color: var(--accent);
+            font-weight: 600;
         }
 
-        .chapter-submission-panel {
-            display: flex;
-            gap: 18px;
-            align-items: flex-start;
-            flex-wrap: wrap;
+        /* ================= TAB SYSTEM ================= */
+        .tab-view { display: none; }
+        .tab-view.active { display: block; }
+
+        /* ================= CHAPTERS TAB ================= */
+        .chapter-item {
             background: var(--card);
             padding: 18px;
             border-radius: 12px;
-            margin-bottom: 14px;
             border: 1px solid var(--border);
+            margin-bottom: 14px;
         }
 
-        .submission-meta {
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.opened { background: #fef3c7; color: #92400e; }
+        .status-badge.closed { background: #d1fae5; color: #065f46; }
+
+        .submission-card {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 6px rgba(15,23,36,.04);
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
         }
 
-        .feedback-panel {
+        .submission-status {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .submission-status.accepted { background: #d1fae5; color: #065f46; }
+        .submission-status.pending { background: #fef3c7; color: #92400e; }
+        .submission-status.rejected { background: #fee2e2; color: #991b1b; }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-top: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .comment-item {
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        /* ================= MILESTONES TAB ================= */
+        .milestone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .milestone-item {
             background: var(--card);
+            padding: 16px;
             border-radius: 10px;
             border: 1px solid var(--border);
-            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        /* Responsive */
-        @media (max-width: 1100px) {
-            .cards {
-                grid-template-columns:repeat(2, 1fr);
-            }
-
-            .sidebar {
-                display: none;
-            }
+        .milestone-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
         }
 
-        @media (max-width: 800px) {
-            .actions-row, .chapter-submission-panel, .submission-meta, .feedback-panel {
-                flex-direction: column;
-            }
-
-            .chapter-submission-panel > div {
-                min-width: unset;
-            }
+        .milestone-icon.complete {
+            background: #d1fae5;
+            color: #065f46;
         }
 
-        @media (max-width: 640px) {
-            body {
-                font-size: 13px;
-            }
-
-            .cards {
-                grid-template-columns:1fr;
-            }
+        .milestone-icon.pending {
+            background: #f3f4f6;
+            color: #6b7280;
         }
 
-        #editor {
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            min-height: 200px;
-            padding: 10px;
+        /* ================= DOCUMENTS TAB ================= */
+        .document-section {
+            background: var(--card);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
         }
 
-        #upload-section {
-            margin-top: 10px;
+        .document-section h3 {
+            font-size: 16px;
+            margin-bottom: 14px;
         }
 
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .document-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .document-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--soft);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+        }
+
+        @media(max-width:1100px){
+            .sidebar{display:none}
+            .cards { grid-template-columns: repeat(2,1fr); }
+        }
+
+        @media(max-width:640px){
+            .cards { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-<div class="app" role="application" aria-label="Dashboard app">
+<div class="app">
     <!-- SIDEBAR -->
-    <aside class="sidebar" role="complementary" aria-label="Sidebar">
+    <aside class="sidebar">
         <div>
             <div class="brand">DRAKA</div>
             <div class="brand-sub">Thesis Management</div>
         </div>
-        <nav class="nav" aria-label="Main navigation">
+        <nav class="nav">
             <a href="index.html"><span class="ico">D</span><span>Dashboard</span></a>
             <a class="active" href="#"><span class="ico">R</span><span>My Research</span></a>
             <a href="resources.html"><span class="ico">S</span><span>Resources</span></a>
@@ -333,251 +414,371 @@
         </nav>
         <div class="sidebar-footer">
             <div class="user-row">
-                <div class="avatar" aria-hidden="true">OF</div>
+                <div class="avatar" id="user-avatar">OF</div>
                 <div class="user-info">
-                    <div class="name">OFORI</div>
+                    <div class="name" id="user-name">OFORI</div>
                     <div class="role">Graduate Student</div>
                 </div>
             </div>
-            <button class="logout" aria-label="Log out">Log out</button>
+            <button class="logout">Log out</button>
         </div>
     </aside>
 
-    <!-- MAIN -->
-    <main class="main" role="main">
-        <div class="top-row">
-            <div class="welcome">
-                <h1>My Research</h1>
-                <p>Manage your chapter submissions and track progress</p>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center">
-                <button onclick="window.location='index.html';"
-                        style="padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;">
-                    Back to Dashboard
-                </button>
-            </div>
-        </div>
+    <main class="main">
+        <h1>My Research</h1>
 
-        <!-- 4 Cards -->
-        <section class="cards" aria-label="Status cards">
-            <article class="card" aria-labelledby="c1">
+        <!-- CARDS -->
+        <section class="cards">
+            <div class="card">
                 <div class="label">Progress</div>
-                <div id="c1" class="value">0%</div>
-                <div class="sub">[Progress Bar]</div>
-            </article>
-            <article class="card" aria-labelledby="c2">
+                <div class="value" id="progress-value">--</div>
+            </div>
+            <div class="card">
                 <div class="label">Submissions</div>
-                <div id="c2" class="value">1</div>
-                <div class="sub">[More information related to submissions]</div>
-            </article>
-            <article class="card" aria-labelledby="c3">
-                <div class="label">Comments</div>
-                <div id="c3" class="value">1</div>
-                <div class="sub">[Sub text related to comments]</div>
-            </article>
-            <article class="card" aria-labelledby="c4">
-                <div class="label">Action</div>
-                <div id="c4" class="value">[Data]</div>
-                <div class="sub">[Text related to Actions to take]</div>
-            </article>
+                <div class="value" id="submissions-value">--</div>
+            </div>
+            <div class="card">
+                <div class="label">Approved</div>
+                <div class="value" id="approved-value">--</div>
+            </div>
+            <div class="card">
+                <div class="label">Action Needed</div>
+                <div class="value" id="action-value">--</div>
+            </div>
         </section>
 
-        <!-- Actions row -->
+        <!-- ACTION BUTTONS -->
         <section class="actions-row">
-            <button class="icon-btn"><span class="ico">📄</span>Chapters</button>
-            <button class="icon-btn"><span class="ico">🎯</span>Milestones</button>
-            <button class="icon-btn"><span class="ico">🗂️</span>Documents</button>
+            <button class="icon-btn active" data-tab="chapters">Chapters</button>
+            <button class="icon-btn" data-tab="milestones">Milestones</button>
+            <button class="icon-btn" data-tab="documents">Documents</button>
         </section>
 
-        <!-- Chapter Submissions Header -->
-        <div style="margin-bottom:18px;">
-            <h2 style="margin-bottom:4px;font-size:18px;">Chapter Submissions</h2>
-            <p class="muted" style="margin:0 0 10px 0;font-size:13px;">Submit chapter drafts and communicate with your
-                supervisor.</p>
+        <!-- ================= CHAPTERS TAB ================= -->
+        <div id="tab-chapters" class="tab-view active">
+            <div id="chapters-container"></div>
         </div>
 
-        <!-- Expandable submission section -->
-        <div class="chapter-submission-panel">
-            <div style="flex:2;min-width:220px;">
-                <details>
-                    <summary style="font-size:16px;font-weight:600;cursor:pointer;">
-                        Chapter 1: Introduction
-                        <span style="margin-left:8px;">
-              <button style="background:#fbbf24;color:#fff;border:none;border-radius:7px;padding:3px 9px;font-size:11px;">In Progress</button>
-            </span>
-                    </summary>
-                    <div style="margin-top:10px;">
-
-                        <!-- Submission list -->
-                        <div id="submission-list" style="display:none;">
-                            <div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
-                                <b style="font-size:13px;">Submission v1</b>
-                                <p class="muted" style="margin:6px 0 0;">Draft submitted</p>
-                            </div>
-                        </div>
-
-                        <!-- Submission form -->
-                        <div id="submission-form" style="display:none;">
-
-                            <div id="toolbar">
-                                <button type="button" onclick="formatText('bold')"><b>B</b></button>
-                                <button type="button" onclick="formatText('italic')"><i>I</i></button>
-                                <button type="button" onclick="formatText('underline')"><u>U</u></button>
-                            </div>
-
-                            <textarea
-                                    id="editor"
-                                    spellcheck="true"
-                                    placeholder="Add your research data..."
-                                    style="width:100%;min-height:120px;border-radius:7px;border:1px solid var(--border);padding:7px;font-family:inherit;">
-    </textarea>
-
-                            <div id="upload-section" style="margin-top:8px;">
-                                <label for="fileInput">Upload a text file (.txt, .doc, .docx):</label>
-                                <input type="file" id="fileInput" accept=".txt,.doc,.docx"/>
-                            </div>
-
-                            <!-- Save button -->
-                            <div style="margin-top:12px;display:flex;justify-content:flex-end;">
-                                <button
-                                        type="button"
-                                        onclick="saveSubmission()"
-                                        style="padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">
-                                    Save Submission
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </details>
-            </div>
-            <div style="flex:1;display:flex;justify-content:flex-end;align-items:start;min-width:150px;">
-                <button class="btn"
-                        onclick="showSubmissionForm()"
-                        style="padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">
-                    + New Submission
-                </button>
-
-            </div>
+        <!-- ================= MILESTONES TAB ================= -->
+        <div id="tab-milestones" class="tab-view">
+            <div class="milestone-list" id="milestones-container"></div>
         </div>
 
-        <!-- Submission meta info -->
-        <div class="submission-meta">
-            <button style="background:#f97316;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:12px;">
-                Submissions: 1
-            </button>
-            <span style="margin-left:14px;color:#7b8896;font-size:13px;">I am still learning how to use this section</span>
-            <br>
-            <span style="color:#2f6ee8;padding-top:3px;font-size:12px;display:block;">Course Outline: DRAFT_v1.0_2025/11/19</span>
+        <!-- ================= DOCUMENTS TAB ================= -->
+        <div id="tab-documents" class="tab-view">
+            <div id="documents-container"></div>
         </div>
-
-        <!-- Supervisor Feedback -->
-        <div class="feedback-panel">
-            <b style="font-size:13px;color:#253244;">Supervisor Feedback</b>
-            <div style="margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;">
-                <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">
-                    PC Draka: Noted
-                </button>
-                <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">
-                    PC Draka: Noted
-                </button>
-                <button style="background:var(--border);color:#2f6ee8;border:none;padding:6px 13px;border-radius:7px;font-size:12px;">
-                    PC Draka: Noted
-                </button>
-            </div>
-        </div>
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const userId = urlParams.get("userId");
-
-                if (!userId) {
-                    window.location.href = "login.html"
-                    return;
-                }
-                document.querySelectorAll('nav a[href$=".html"]').forEach(link => {
-                    const url = new URL(link.getAttribute("href"), window.location.origin);
-                    url.searchParams.set("userId", userId);
-                    link.href = url.pathname + "?" + url.searchParams.toString();
-                });
-            });
-
-            // Toggle this to simulate screenshots
-            // true  = submissions exist
-            // false = no submissions
-            const hasSubmissions = true;
-
-            document.addEventListener("DOMContentLoaded", () => {
-                const submissionList = document.getElementById("submission-list");
-                const submissionForm = document.getElementById("submission-form");
-
-                if (hasSubmissions) {
-                    submissionList.style.display = "block";
-                    submissionForm.style.display = "none";
-                } else {
-                    submissionList.style.display = "none";
-                    submissionForm.style.display = "block";
-                }
-            });
-
-            function showSubmissionForm() {
-                document.getElementById("submission-form").style.display = "block";
-            }
-
-            function formatText(command) {
-                document.execCommand(command, false, null);
-            }
-
-            async function saveSubmission() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const userId = urlParams.get("userId");
-
-                if (!userId) {
-                    alert("No userId provided in URL");
-                    return;
-                }
-
-                const content = document.getElementById("editor").value;
-                const fileInput = document.getElementById("fileInput");
-                const file = fileInput.files[0] || null;
-
-                if (!content.trim() && !file) {
-                    alert("Please add text or upload a file before saving.");
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append("content", content);
-                if (file) formData.append("file", file);
-
-                try {
-                    const res = await fetch(`/student-chapter/student/${userId}`, {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        alert(data.message || "Failed to save submission");
-                        return;
-                    }
-
-                    // UI update after successful save
-                    document.getElementById("submission-form").style.display = "none";
-                    document.getElementById("submission-list").style.display = "block";
-
-                    alert("Submission saved successfully.");
-
-                } catch (e) {
-                    console.error(e);
-                    alert("An error occurred while saving submission.");
-                }
-            }
-        </script>
-
     </main>
 </div>
+
+<script>
+    // Sample data - replace with actual API call
+    // const sampleData = {
+    //     lastName: "3",
+    //     percentageCompleted: 25,
+    //     approvedSubmissions: 1,
+    //     pendingAction: 0,
+    //     totalChapters: 4,
+    //     abbreviation: "TU3",
+    //     totalSubmissions: 1,
+    //     studentChapters: [
+    //         {
+    //             id: "57ca0c72-b7b2-418d-a98f-a2171a1c32d6",
+    //             studentId: "00000",
+    //             chapter: {
+    //                 id: "476f4ac9-39ee-405d-8fac-321ef8032ced",
+    //                 name: "Chapter One",
+    //                 stage: 1
+    //             },
+    //             submissions: [],
+    //             status: "OPENED",
+    //             createdAt: "2025-11-27T09:28:57.554342"
+    //         },
+    //         {
+    //             id: "e35671bd-0a97-48ed-8dc5-11f07fb38355",
+    //             studentId: "00000",
+    //             chapter: {
+    //                 id: "476f4ac9-39ee-405d-8fac-321ef8032ced",
+    //                 name: "Chapter One",
+    //                 stage: 1
+    //             },
+    //             submissions: [
+    //                 {
+    //                     id: "7c84b965-0235-4fd3-9512-6c6446c42287",
+    //                     summary: "Just a file",
+    //                     status: "ACCEPTED",
+    //                     comments: [
+    //                         { id: "409954dc", comment: "You need to review this" },
+    //                         { id: "7da70d1d", comment: "Good progress overall" }
+    //                     ],
+    //                     resources: [
+    //                         {
+    //                             id: "2548dcac",
+    //                             fileType: "PDF",
+    //                             fileName: "jasperReportAlternativesResearch",
+    //                             generatedFileName: "jasperReportAlternativesResearch_2025-11-24T22:06:19"
+    //                         }
+    //                     ],
+    //                     createdAt: "2025-11-24T22:06:05.001663"
+    //                 },
+    //                 {
+    //                     id: "9f21a432-1234-5678-abcd-ef0123456789",
+    //                     summary: "Revised draft with corrections",
+    //                     status: "PENDING",
+    //                     comments: [
+    //                         { id: "abc123", comment: "Please address the methodology section" },
+    //                         { id: "def456", comment: "Good improvements from last version" }
+    //                     ],
+    //                     resources: [
+    //                         {
+    //                             id: "7891xyz",
+    //                             fileType: "DOCX",
+    //                             fileName: "Chapter_One_Revised_Draft",
+    //                             generatedFileName: "Chapter_One_Revised_Draft_2025-12-01T14:30:00"
+    //                         },
+    //                         {
+    //                             id: "4562abc",
+    //                             fileType: "PDF",
+    //                             fileName: "Reference_Materials",
+    //                             generatedFileName: "Reference_Materials_2025-12-01T14:32:00"
+    //                         }
+    //                     ],
+    //                     createdAt: "2025-12-01T14:30:00.123456"
+    //                 }
+    //             ],
+    //             status: "CLOSED",
+    //             createdAt: "2025-05-24T16:04:23.45"
+    //         }
+    //     ]
+    // };
+
+    // Initialize page
+    async function init() {
+
+        //Make initial call to backend to fetch data
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("userId");
+        const res = await fetch(`/report/research/${userId}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"}
+        })
+        const sampleData = await res.json();
+
+        if (!res.ok) {
+            alert("An error occurred");
+        }
+
+        loadData(sampleData);
+        setupTabSwitching();
+    }
+
+    function loadData(data) {
+        // Update cards
+        document.getElementById('progress-value').textContent = `${data.percentageCompleted}%`;
+        document.getElementById('submissions-value').textContent = data.totalSubmissions;
+        document.getElementById('approved-value').textContent = data.approvedSubmissions;
+        document.getElementById('action-value').textContent = data.pendingAction;
+
+        // Update user info
+        document.getElementById('user-avatar').textContent = data.abbreviation;
+
+        // Render chapters
+        renderChapters(data.studentChapters);
+
+        // Render milestones
+        renderMilestones(data);
+
+        // Render documents
+        renderDocuments(data.studentChapters);
+    }
+
+    function renderChapters(chapters) {
+        const container = document.getElementById('chapters-container');
+
+        if (chapters.length === 0) {
+            container.innerHTML = '<div class="empty-state">No chapters yet</div>';
+            return;
+        }
+
+        // Group chapters by chapter name
+        const groupedChapters = {};
+        chapters.forEach(ch => {
+            const chapterName = ch.chapter.name;
+            if (!groupedChapters[chapterName]) {
+                groupedChapters[chapterName] = {
+                    chapter: ch.chapter,
+                    status: ch.status,
+                    allSubmissions: []
+                };
+            }
+            groupedChapters[chapterName].allSubmissions.push(...ch.submissions);
+            // Update status to CLOSED if any instance is closed
+            if (ch.status === 'CLOSED') {
+                groupedChapters[chapterName].status = 'CLOSED';
+            }
+        });
+
+        container.innerHTML = Object.values(groupedChapters).map(chapterGroup => `
+            <div class="chapter-item">
+                <div class="chapter-header">
+                    <div>
+                        <div class="chapter-title">${chapterGroup.chapter.name}</div>
+                        <div class="muted">Stage ${chapterGroup.chapter.stage}</div>
+                    </div>
+                    <span class="status-badge ${chapterGroup.status.toLowerCase()}">${chapterGroup.status}</span>
+                </div>
+
+                ${chapterGroup.allSubmissions.length === 0 ? `
+                    <div class="muted">No submissions yet</div>
+                    <button class="btn-primary" style="margin-top: 12px;">+ New Submission</button>
+                ` : chapterGroup.allSubmissions.map(sub => `
+                    <div class="submission-card">
+                        <div class="submission-header">
+                            <div>
+                                <strong>Submission</strong>
+                                <div class="muted">${sub.summary}</div>
+                            </div>
+                            <span class="submission-status ${sub.status.toLowerCase()}">${sub.status}</span>
+                        </div>
+
+                        ${sub.resources.length > 0 ? `
+                            <div style="margin-top: 12px;">
+                                <strong style="font-size: 13px;">Documents:</strong>
+                                ${sub.resources.map(res => `
+                                    <div class="resource-item">
+                                        <span style="font-size: 20px;">📄</span>
+                                        <div style="flex: 1;">
+                                            <div style="font-size: 13px; font-weight: 500;">${res.fileName}</div>
+                                            <div class="muted" style="font-size: 11px;">${res.fileType}</div>
+                                        </div>
+                                        <button style="padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer;">
+                                            Download
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${sub.comments.length > 0 ? `
+                            <div style="margin-top: 12px;">
+                                <strong style="font-size: 13px;">Supervisor Feedback:</strong>
+                                ${sub.comments.map(comment => `
+                                    <div class="comment-item">💬 ${comment.comment}</div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+
+                <button class="btn-primary" style="margin-top: 12px;">+ New Submission</button>
+            </div>
+        `).join('');
+    }
+
+    function renderMilestones(data) {
+        const container = document.getElementById('milestones-container');
+        const hasSubmission = data.totalSubmissions > 0;
+        const hasApproved = data.approvedSubmissions > 0;
+
+        container.innerHTML = `
+            <div class="milestone-item">
+                <div class="milestone-icon complete">✓</div>
+                <div>
+                    <div style="font-weight: 600;">Make your first submission</div>
+                    <div class="muted">Completed</div>
+                </div>
+            </div>
+
+            <div class="milestone-item">
+                <div class="milestone-icon ${hasApproved ? 'complete' : 'pending'}">
+                    ${hasApproved ? '✓' : '○'}
+                </div>
+                <div>
+                    <div style="font-weight: 600;">Get first approval</div>
+                    <div class="muted">${hasApproved ? 'Completed' : 'In progress'}</div>
+                </div>
+            </div>
+
+            <div class="milestone-item">
+                <div class="milestone-icon pending">○</div>
+                <div>
+                    <div style="font-weight: 600;">Complete all chapters</div>
+                    <div class="muted">${data.percentageCompleted}% complete</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderDocuments(chapters) {
+        const container = document.getElementById('documents-container');
+        const allDocs = [];
+
+        chapters.forEach(ch => {
+            ch.submissions.forEach(sub => {
+                sub.resources.forEach(res => {
+                    allDocs.push({
+                        chapter: ch.chapter.name,
+                        ...res
+                    });
+                });
+            });
+        });
+
+        if (allDocs.length === 0) {
+            container.innerHTML = '<div class="empty-state">No documents uploaded yet</div>';
+            return;
+        }
+
+        const docsByChapter = {};
+        allDocs.forEach(doc => {
+            if (!docsByChapter[doc.chapter]) {
+                docsByChapter[doc.chapter] = [];
+            }
+            docsByChapter[doc.chapter].push(doc);
+        });
+
+        container.innerHTML = Object.entries(docsByChapter).map(([chapter, docs]) => `
+            <div class="document-section">
+                <h3>${chapter}</h3>
+                <div class="document-list">
+                    ${docs.map(doc => `
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">${doc.fileType}</div>
+                                <div>
+                                    <div style="font-weight: 500; font-size: 14px;">${doc.fileName}</div>
+                                    <div class="muted" style="font-size: 12px;">${doc.fileType} file</div>
+                                </div>
+                            </div>
+                            <button style="padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-size: 13px;">
+                                Download
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function setupTabSwitching() {
+        const buttons = document.querySelectorAll('.icon-btn[data-tab]');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(`tab-${tabName}`).classList.add('active');
+            });
+        });
+    }
+
+    // Initialize on page load
+    init();
+</script>
+
 </body>
 </html>

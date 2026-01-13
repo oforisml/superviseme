@@ -2,6 +2,7 @@ package com.example.superviseme.restcontrollers;
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +12,9 @@ import com.example.superviseme.service.ChapterService;
 
 @RestController
 @RequestMapping(name="Chapter Controller", value = "/chapter")
-@CrossOrigin(origins = "*")
+@Tag(name = "Chapter Controller",
+		description = "The endpoints herein are for the CRUD that would be used for chapter management")
+
 public class ChapterController {
 	
 	private final ChapterService chapterService;

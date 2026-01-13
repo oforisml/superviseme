@@ -4,12 +4,15 @@ import com.example.superviseme.service.StudentChapterService;
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/student-chapter/student/")
-@CrossOrigin(origins = "*")
+
+@Tag(name = "Student Chapter Controller",
+        description = "The endpoints herein are for the CRUD that would be used for student chapter management")
 
 public class StudentChapterController {
     private final StudentChapterService service;
@@ -18,12 +21,6 @@ public class StudentChapterController {
         this.service = service;
     }
 
-//    todo: Creating a student chapter
-
-
-//    todo: update Student chapter
-
-//    todo: Get student chapter
     @GetMapping(value = "{studentid}")
     public ResponseEntity<?> getChapters(@PathVariable(name = "studentid") UUID studentId){
         return service.findAllChaptersByStudentId(studentId);

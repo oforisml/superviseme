@@ -1,5 +1,6 @@
 package com.example.superviseme.restcontrollers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,10 @@ import com.example.superviseme.service.MeetingService;
 
 @RestController
 @RequestMapping(name="Meeting Controller", value = "/meetings")
+
+@Tag(name = "Meeting Controller",
+		description = "The endpoints herein are for the CRUD that would be used for meeting management")
+
 public class MeetingController {
 	
 	private final MeetingService meetingService;

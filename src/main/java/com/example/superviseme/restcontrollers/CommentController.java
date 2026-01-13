@@ -4,6 +4,7 @@ import com.example.superviseme.service.CommentService;
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/comments")
-@CrossOrigin(origins = "*")
+@Tag(name = "Comments Controller",
+        description = "The endpoints herein are for the CRUD that would be used for comments management")
 
 public class CommentController {
     private final CommentService service;

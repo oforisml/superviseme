@@ -11,7 +11,7 @@ import com.example.superviseme.exceptionhandler.ResourceNotFoundException;
 import com.example.superviseme.record.StudentLoginCheck;
 import com.example.superviseme.record.StudentRecord;
 import com.example.superviseme.record.StudentRegistrationDto;
-import com.example.superviseme.record.StudentProfileRecord;
+import com.example.superviseme.record.StudentProfilePatch;
 import com.example.superviseme.repository.ChapterRepository;
 import com.example.superviseme.repository.StudentChapterRepository;
 import com.example.superviseme.repository.StudentProfileRepository;
@@ -117,7 +117,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> updateStudentProfile(StudentProfileRecord record) {
+    public ResponseEntity<?> updateStudentProfile(StudentProfilePatch record) {
 
         // Student record Id
         User user = findById(record.id());

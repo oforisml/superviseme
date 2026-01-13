@@ -20,10 +20,9 @@ import java.util.stream.Collectors;
 @RequestMapping(name = "Resources Controller", value = "/resource")
 @Tag(
         name = "Resources Controller",
-        description = "The endpoints herein are for the CRUD of fees that would be used for resource management"
+        description = "The endpoints herein are for the CRUD that are used for resource management"
 )
 @RestController
-@CrossOrigin(origins = "*")
 
 public class ResourcesController {
 

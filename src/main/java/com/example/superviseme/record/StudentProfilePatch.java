@@ -1,10 +1,9 @@
 package com.example.superviseme.record;
 
-import com.example.superviseme.entities.User;
 import com.example.superviseme.enums.Role;
 
 import java.util.UUID;
-public record StudentProfileRecord(
+public record StudentProfilePatch(
      UUID id,
      String email,
      String pin,
